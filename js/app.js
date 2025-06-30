@@ -503,7 +503,7 @@ async function loadCourses() {
   }
 }
 
-function displayCourses(courses) {
+async function displayCourses(courses) {
   const coursesGrid = document.getElementById('courses-grid');
   
   if (!courses || courses.length === 0) {
@@ -511,7 +511,19 @@ function displayCourses(courses) {
     return;
   }
   
-  coursesGrid.innerHTML = courses.map(course => `
+  // التحقق من اشتراكات المستخدم لكل كورس
+  const coursesWithAccess = await Promise.all(
+    courses.map(async (course) => {
+      if (!currentUser) {
+        return { ...course, hasAccess: false };
+      }
+      
+      const { data: access } = await checkUserCourseAccess(currentUser.id, course.id);
+      return { ...course, hasAccess: !!access };
+    })
+  );
+  
+  coursesGrid.innerHTML = coursesWithAccess.map(course => `
     <div class="course-card">
       <img src="${course.image_url || 'https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg'}" 
            alt="${course.title}" class="course-image">
@@ -521,7 +533,10 @@ function displayCourses(courses) {
         <div class="course-price">${course.price} ج.م</div>
         <div class="course-actions">
           <button class="btn-primary" onclick="showCoursePreview('${course.id}')">معاينة</button>
-          <button class="btn-secondary" onclick="subscribeToCourse('${course.id}')">اشتراك</button>
+          ${course.hasAccess 
+            ? `<button class="btn-success" onclick="showCourseContent('${course.id}')">دخول الكورس</button>`
+            : `<button class="btn-secondary" onclick="subscribeToCourse('${course.id}')">اشتراك</button>`
+          }
         </div>
       </div>
     </div>
@@ -585,6 +600,15 @@ function displayCoursePreview(course) {
 }
 
 async function subscribeToCourse(courseId) {
+  // التحقق أولاً من وجود اشتراك سابق
+  const { data: existingAccess } = await checkUserCourseAccess(currentUser.id, courseId);
+  
+  if (existingAccess) {
+    // المستخدم مشترك بالفعل، انتقل مباشرة للكورس
+    showCourseContent(courseId);
+    return;
+  }
+  
   currentCourseId = courseId;
   
   // Get course details for modal
@@ -639,6 +663,9 @@ async function handleCourseSubscription(e) {
     
     // Clear form
     document.getElementById('subscription-code').value = '';
+    
+    // إعادة تحميل الكورسات لتحديث حالة الاشتراك
+    await loadCourses();
     
     // Show course content
     showCourseContent(currentCourseId);
