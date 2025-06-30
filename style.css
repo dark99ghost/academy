@@ -622,9 +622,9 @@ body {
 
 /* مشغل الفيديو - الحجم الكامل */
 .video-player {
-  width: 60vh;
+  width: 100%;
   height: 50vh;
-  min-height: 500px;
+  min-height: 50vh;
   flex: 1;
   display: flex;
   align-items: center;
