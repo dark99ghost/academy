@@ -314,6 +314,7 @@ body {
   cursor: pointer;
   border: 2px solid var(--border-color);
   transition: var(--transition);
+  vertical-align: middle;
 }
 
 .user-avatar:hover {
