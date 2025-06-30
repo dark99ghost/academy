@@ -42,6 +42,7 @@ let currentCourse = null;
 let currentLecture = null;
 let currentCourseId = null;
 let currentLectureId = null;
+let currentMaterial = null;
 let modalEventListenersAdded = false; // منع تكرار إضافة event listeners
 
 // DOM Elements
@@ -717,19 +718,40 @@ function displayCourseContent(course) {
   const sortedLectures = course.lectures.sort((a, b) => a.order_index - b.order_index);
   
   wrapper.innerHTML = `
-    <div class="course-sidebar">
-      <h4>المحاضرات</h4>
-      ${sortedLectures.map((lecture, index) => `
-        <div class="lecture-sidebar-item ${index === 0 ? 'active' : ''}" 
-             onclick="selectLecture('${lecture.id}', this)">
-          <h6>${lecture.title}</h6>
-          <p>${lecture.duration || 0} دقيقة</p>
+    <div class="course-layout">
+      <!-- منطقة عرض المحتوى الرئيسي -->
+      <div class="main-content-area">
+        <div id="material-viewer">
+          <div class="welcome-message">
+            <h3>مرحباً بك في كورس ${course.title}</h3>
+            <p>اختر محاضرة من القائمة الجانبية للبدء</p>
+          </div>
         </div>
-      `).join('')}
-    </div>
-    <div class="course-main-content">
-      <div id="lecture-content">
-        <!-- Lecture content will be loaded here -->
+      </div>
+      
+      <!-- الشريط الجانبي للمحاضرات -->
+      <div class="course-sidebar">
+        <h4>المحاضرات</h4>
+        <div class="lectures-list">
+          ${sortedLectures.map((lecture, index) => `
+            <div class="lecture-sidebar-item ${index === 0 ? 'active' : ''}" 
+                 onclick="selectLecture('${lecture.id}', this)">
+              <h6>${lecture.title}</h6>
+              <p>${lecture.duration || 0} دقيقة</p>
+              <span class="materials-count">${lecture.lecture_materials?.length || 0} مادة</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- منطقة المواد في الأسفل -->
+      <div class="materials-bottom-panel">
+        <div class="materials-header">
+          <h5 id="current-lecture-title">اختر محاضرة لعرض موادها</h5>
+        </div>
+        <div class="materials-grid" id="materials-grid">
+          <p class="no-materials">لا توجد مواد متاحة</p>
+        </div>
       </div>
     </div>
   `;
@@ -740,7 +762,7 @@ function displayCourseContent(course) {
   }
 }
 
-// إصلاح دالة selectLecture لحل مشكلة event.target
+// دالة محسنة لاختيار المحاضرة وعرض موادها
 async function selectLecture(lectureId, clickedElement = null) {
   try {
     // Find lecture in current course
@@ -751,7 +773,6 @@ async function selectLecture(lectureId, clickedElement = null) {
     }
     
     currentLecture = lecture;
-    displayLectureContent(lecture);
     
     // Update sidebar active state
     document.querySelectorAll('.lecture-sidebar-item').forEach(item => {
@@ -769,64 +790,144 @@ async function selectLecture(lectureId, clickedElement = null) {
       }
     }
     
+    // Update lecture title in materials panel
+    document.getElementById('current-lecture-title').textContent = lecture.title;
+    
+    // Display materials in bottom panel
+    displayLectureMaterials(lecture);
+    
+    // Clear main content area
+    document.getElementById('material-viewer').innerHTML = `
+      <div class="lecture-info">
+        <h3>${lecture.title}</h3>
+        <p class="lecture-description">${lecture.description || 'لا يوجد وصف للمحاضرة'}</p>
+        <p class="select-material-hint">اختر مادة من الأسفل لعرضها هنا</p>
+      </div>
+    `;
+    
   } catch (error) {
     console.error('Error selecting lecture:', error);
     alert('خطأ في تحميل المحاضرة: ' + error.message);
   }
 }
 
-function displayLectureContent(lecture) {
-  const lectureContent = document.getElementById('lecture-content');
+// دالة لعرض مواد المحاضرة في الأسفل
+function displayLectureMaterials(lecture) {
+  const materialsGrid = document.getElementById('materials-grid');
   
   // Sort materials by order
   const sortedMaterials = lecture.lecture_materials 
     ? lecture.lecture_materials.sort((a, b) => a.order_index - b.order_index)
     : [];
   
-  const materialsHtml = sortedMaterials.length > 0
-    ? sortedMaterials.map(material => {
-        if (material.type === 'video') {
-          const embedUrl = getYouTubeEmbedUrl(material.url);
-          return `
-            <div class="material-content">
-              <h6><i class="fas fa-play"></i> ${material.title}</h6>
-              <div class="video-container">
-                <iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
-              </div>
-              ${material.duration ? `<p class="material-duration">المدة: ${material.duration} دقيقة</p>` : ''}
-            </div>
-          `;
-        } else {
-          return `
-            <div class="material-content file-material">
-              <h6>${getMaterialTypeIcon(material.type)} ${material.title}</h6>
-              <a href="${material.url}" target="_blank" class="btn-secondary">
-                <i class="fas fa-download"></i> تحميل/عرض
-              </a>
-            </div>
-          `;
-        }
-      }).join('')
-    : '<p>لا توجد مواد متاحة لهذه المحاضرة</p>';
+  if (sortedMaterials.length === 0) {
+    materialsGrid.innerHTML = '<p class="no-materials">لا توجد مواد متاحة لهذه المحاضرة</p>';
+    return;
+  }
   
-  lectureContent.innerHTML = `
-    <h4>${lecture.title}</h4>
-    <p class="lecture-description">${lecture.description || 'لا يوجد وصف للمحاضرة'}</p>
-    <div class="lecture-materials">
-      ${materialsHtml}
+  materialsGrid.innerHTML = sortedMaterials.map(material => `
+    <div class="material-card" onclick="selectMaterial('${material.id}')">
+      <div class="material-icon">
+        ${getMaterialTypeIcon(material.type)}
+      </div>
+      <div class="material-info">
+        <h6>${material.title}</h6>
+        <p class="material-type">${getMaterialTypeName(material.type)}</p>
+        ${material.duration ? `<p class="material-duration">${material.duration} دقيقة</p>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// دالة لاختيار وعرض المادة في المنطقة الرئيسية
+function selectMaterial(materialId) {
+  const material = currentLecture.lecture_materials.find(m => m.id === materialId);
+  
+  if (!material) {
+    alert('المادة غير موجودة');
+    return;
+  }
+  
+  currentMaterial = material;
+  
+  // Update active state in materials grid
+  document.querySelectorAll('.material-card').forEach(card => {
+    card.classList.remove('active');
+  });
+  
+  event.target.closest('.material-card').classList.add('active');
+  
+  // Display material in main viewer
+  displayMaterialInViewer(material);
+}
+
+// دالة لعرض المادة في المنطقة الرئيسية
+function displayMaterialInViewer(material) {
+  const materialViewer = document.getElementById('material-viewer');
+  
+  let materialContent = '';
+  
+  if (material.type === 'video') {
+    const embedUrl = getYouTubeEmbedUrl(material.url);
+    materialContent = `
+      <div class="video-player">
+        <iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
+      </div>
+    `;
+  } else {
+    materialContent = `
+      <div class="file-viewer">
+        <div class="file-info">
+          <div class="file-icon-large">
+            ${getMaterialTypeIcon(material.type)}
+          </div>
+          <h4>${material.title}</h4>
+          <p>نوع الملف: ${getMaterialTypeName(material.type)}</p>
+          ${material.duration ? `<p>المدة: ${material.duration} دقيقة</p>` : ''}
+        </div>
+        <div class="file-actions">
+          <a href="${material.url}" target="_blank" class="btn-primary">
+            <i class="fas fa-external-link-alt"></i> فتح في نافذة جديدة
+          </a>
+          <a href="${material.url}" download class="btn-secondary">
+            <i class="fas fa-download"></i> تحميل
+          </a>
+        </div>
+      </div>
+    `;
+  }
+  
+  materialViewer.innerHTML = `
+    <div class="material-header">
+      <h3>${material.title}</h3>
+      <span class="material-type-badge">${getMaterialTypeName(material.type)}</span>
+    </div>
+    <div class="material-content">
+      ${materialContent}
     </div>
   `;
 }
 
 function getMaterialTypeIcon(type) {
   const icons = {
-    video: '<i class="fas fa-play"></i>',
+    video: '<i class="fas fa-play-circle"></i>',
     pdf: '<i class="fas fa-file-pdf"></i>',
     document: '<i class="fas fa-file-word"></i>',
     image: '<i class="fas fa-image"></i>',
     audio: '<i class="fas fa-volume-up"></i>'
   };
   return icons[type] || '<i class="fas fa-file"></i>';
+}
+
+function getMaterialTypeName(type) {
+  const names = {
+    video: 'فيديو',
+    pdf: 'ملف PDF',
+    document: 'مستند',
+    image: 'صورة',
+    audio: 'ملف صوتي'
+  };
+  return names[type] || 'ملف';
 }
 
 // Instructor functions
@@ -1612,6 +1713,7 @@ window.showCoursePreview = showCoursePreview;
 window.subscribeToCourse = subscribeToCourse;
 window.showCourseContent = showCourseContent;
 window.selectLecture = selectLecture;
+window.selectMaterial = selectMaterial;
 window.deleteCourseAdmin = deleteCourseAdmin;
 window.deleteCode = deleteCode;
 window.editCode = editCode;
