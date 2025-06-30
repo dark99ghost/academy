@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الأكاديمية التعليمية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="app">
+      <!-- Loading spinner -->
+      <div id="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>جاري التحميل...</p>
+      </div>
+      
+      <!-- Auth Container -->
+      <div id="auth-container" class="auth-container" style="display: none;">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h1>الأكاديمية التعليمية</h1>
+            <p>منصة التعلم الإلكتروني المتطورة</p>
+          </div>
+          
+          <div id="login-form" class="auth-form">
+            <h2>تسجيل الدخول</h2>
+            <form id="loginForm">
+              <div class="form-group">
+                <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" required>
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="form-group">
+                <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
+                <i class="fas fa-lock"></i>
+              </div>
+              <button type="submit" class="btn-primary">دخول</button>
+            </form>
+            <p class="auth-switch">ليس لديك حساب؟ <a href="#" id="show-register">إنشاء حساب</a></p>
+          </div>
+          
+          <div id="register-form" class="auth-form" style="display: none;">
+            <h2>إنشاء حساب جديد</h2>
+            <form id="registerForm">
+              <div class="form-group">
+                <input type="text" id="registerName" placeholder="الاسم الكامل" required>
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="form-group">
+                <input type="email" id="registerEmail" placeholder="البريد الإلكتروني" required>
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="form-group">
+                <input type="password" id="registerPassword" placeholder="كلمة المرور" required>
+                <i class="fas fa-lock"></i>
+              </div>
+              <div class="form-group">
+                <select id="registerLevel" required>
+                  <option value="">اختر المرحلة الدراسية</option>
+                  <option value="ثانوي">ثانوي</option>
+                  <option value="جامعة">جامعة</option>
+                </select>
+              </div>
+              <button type="submit" class="btn-primary">إنشاء حساب</button>
+            </form>
+            <p class="auth-switch">لديك حساب بالفعل؟ <a href="#" id="show-login">تسجيل الدخول</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main App Container -->
+      <div id="main-container" style="display: none;">
+        <!-- Navigation -->
+        <nav class="navbar">
+          <div class="nav-container">
+            <div class="nav-brand">
+              <h1 id="brand-logo" style="cursor: pointer;">الأكاديمية التعليمية</h1>
+            </div>
+            <div class="nav-menu">
+              <a href="#" data-page="home" class="nav-link active">الرئيسية</a>
+              <a href="#" data-page="profile" class="nav-link">الملف الشخصي</a>
+              <a href="#" data-page="instructor" id="instructor-link" class="nav-link" style="display: none;">لوحة المدرب</a>
+              <a href="#" data-page="admin" id="admin-link" class="nav-link" style="display: none;">لوحة التحكم</a>
+            </div>
+            <div class="nav-actions">
+              <button id="theme-toggle" class="theme-btn">
+                <i class="fas fa-moon"></i>
+              </button>
+              <div class="user-menu">
+                <img id="user-avatar" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMwMDdiZmYiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik0xMiAxMkM5Ljc5IDEyIDggMTAuMjEgOCA4UzkuNzkgNCA1IDRTMTYgNS43OSAxNiA4UzE0LjIxIDEyIDEyIDEyWk0xMiAxNEM5LjMzIDE0IDQgMTUuMzQgNCAyMFYyMkgyMFYyMEMxNiAxNS4zNCAxNC42NyAxNCAxMiAxNFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K" alt="User" class="user-avatar">
+                <div class="dropdown-menu">
+                  <a href="#" data-page="home">الرئيسية</a>
+                  <a href="#" data-page="profile">الملف الشخصي</a>
+                  <a href="#" data-page="instructor" id="instructor-dropdown-link" style="display: none;">لوحة المدرب</a>
+                  <a href="#" data-page="admin" id="admin-dropdown-link" style="display: none;">لوحة التحكم</a>
+                  <a href="#" id="logout-btn">تسجيل الخروج</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Page Content -->
+        <main class="main-content">
+          <!-- Home Page -->
+          <div id="home-page" class="page active">
+            <div class="container">
+              <div class="page-header">
+                <h2>الكورسات المتاحة</h2>
+                <p>اختر الكورس المناسب لك وابدأ رحلة التعلم</p>
+              </div>
+              
+              <div id="courses-grid" class="courses-grid">
+                <!-- Courses will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Preview Page -->
+          <div id="course-preview-page" class="page">
+            <div class="container">
+              <div class="page-header">
+                <button id="back-to-courses" class="btn-secondary" style="margin-bottom: 20px;">
+                  <i class="fas fa-arrow-right"></i> العودة للكورسات
+                </button>
+                <h2 id="course-preview-title">معاينة الكورس</h2>
+              </div>
+              
+              <div id="course-preview-content" class="course-preview-content">
+                <!-- Course preview content will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Content Page -->
+          <div id="course-content-page" class="page">
+            <div class="container">
+              <div class="page-header">
+                <button id="back-to-courses-from-content" class="btn-secondary" style="margin-bottom: 20px;">
+                  <i class="fas fa-arrow-right"></i> العودة للكورسات
+                </button>
+                <h2 id="course-content-title">محتوى الكورس</h2>
+              </div>
+              
+              <div id="course-content-wrapper" class="course-content-wrapper">
+                <!-- Course content will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Page -->
+          <div id="profile-page" class="page">
+            <div class="container">
+              <div class="profile-container">
+                <div class="profile-header">
+                  <h2>الملف الشخصي</h2>
+                </div>
+                
+                <form id="profileForm" class="profile-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>صورة الملف الشخصي</label>
+                      <div class="avatar-upload">
+                        <img id="profile-avatar" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjYwIiBmaWxsPSIjMDA3YmZmIi8+CjxzdmcgeD0iMjQiIHk9IjI0IiB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik0xMiAxMkM5Ljc5IDEyIDggMTAuMjEgOCA4UzkuNzkgNCA1IDRTMTYgNS43OSAxNiA4UzE0LjIxIDEyIDEyIDEyWk0xMiAxNEM5LjMzIDE0IDQgMTUuMzQgNCAyMFYyMkgyMFYyMEMxNiAxNS4zNCAxNC42NyAxNCAxMiAxNFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K" alt="Avatar">
+                        <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+                        <button type="button" id="upload-avatar-btn" class="btn-secondary">رفع صورة</button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>معرف المستخدم (ID)</label>
+                      <input type="text" id="profile-user-id" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label>الاسم الكامل</label>
+                      <input type="text" id="profile-name" required>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>البريد الإلكتروني</label>
+                      <input type="email" id="profile-email" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label>المرحلة الدراسية</label>
+                      <select id="profile-level">
+                        <option value="ثانوي">ثانوي</option>
+                        <option value="جامعة">جامعة</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>الدور</label>
+                      <input type="text" id="profile-role" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label>كلمة المرور الجديدة (اتركها فارغة إذا كنت لا تريد تغييرها)</label>
+                      <input type="password" id="profile-password" placeholder="كلمة المرور الجديدة">
+                    </div>
+                  </div>
+                  
+                  <button type="submit" class="btn-primary">حفظ التغييرات</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructor Dashboard -->
+          <div id="instructor-page" class="page">
+            <div class="container">
+              <div class="instructor-header">
+                <h2>لوحة تحكم المدرب</h2>
+                <p>إدارة الكورسات والمحاضرات</p>
+              </div>
+              
+              <!-- Instructor Actions -->
+              <div class="instructor-actions">
+                <button class="btn-primary" id="instructor-create-course-btn">إنشاء كورس جديد</button>
+              </div>
+              
+              <!-- Instructor Courses List -->
+              <div id="instructor-courses-list" class="admin-list">
+                <!-- Instructor courses will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Dashboard -->
+          <div id="admin-page" class="page">
+            <div class="container">
+              <div class="admin-header">
+                <h2>لوحة التحكم الإدارية</h2>
+              </div>
+              
+              <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="courses">إدارة الكورسات</button>
+                <button class="tab-btn" data-tab="users">إدارة المستخدمين</button>
+                <button class="tab-btn" data-tab="codes">إدارة أكواد الاشتراك</button>
+              </div>
+              
+              <!-- Courses Management -->
+              <div id="admin-courses" class="admin-tab-content active">
+                <div class="admin-actions">
+                  <button class="btn-primary" id="create-course-btn">إنشاء كورس جديد</button>
+                </div>
+                <div id="admin-courses-list" class="admin-list">
+                  <!-- Admin courses will be loaded here -->
+                </div>
+              </div>
+              
+              <!-- Users Management -->
+              <div id="admin-users" class="admin-tab-content">
+                <div class="admin-actions">
+                  <div class="search-container">
+                    <input type="text" id="user-search" placeholder="البحث بمعرف المستخدم (ID)..." class="search-input">
+                    <button id="search-users-btn" class="btn-secondary">
+                      <i class="fas fa-search"></i> بحث
+                    </button>
+                    <button id="clear-search-btn" class="btn-secondary">
+                      <i class="fas fa-times"></i> مسح
+                    </button>
+                  </div>
+                </div>
+                <div id="admin-users-list" class="admin-list">
+                  <!-- Users will be loaded here -->
+                </div>
+              </div>
+              
+              <!-- Subscription Codes Management -->
+              <div id="admin-codes" class="admin-tab-content">
+                <div class="admin-actions">
+                  <button class="btn-primary" id="create-code-btn">إنشاء كود اشتراك</button>
+                </div>
+                <div id="admin-codes-list" class="admin-list">
+                  <!-- Codes will be loaded here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay">
+      <!-- Course Subscription Modal -->
+      <div id="subscription-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>اشتراك في الكورس</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div id="course-details"></div>
+            <form id="subscriptionForm">
+              <div class="form-group">
+                <label>كود الاشتراك</label>
+                <input type="text" id="subscription-code" placeholder="أدخل كود الاشتراك" required>
+              </div>
+              <button type="submit" class="btn-primary">تأكيد الاشتراك</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Course Modal -->
+      <div id="create-course-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>إنشاء كورس جديد</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="createCourseForm">
+              <div class="form-group">
+                <label>اسم الكورس</label>
+                <input type="text" id="course-title" required>
+              </div>
+              <div class="form-group">
+                <label>وصف الكورس</label>
+                <textarea id="course-description" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>سعر الكورس</label>
+                <input type="number" id="course-price" min="0" required>
+              </div>
+              <div class="form-group">
+                <label>الفئة المستهدفة</label>
+                <select id="course-target-level" required>
+                  <option value="">اختر الفئة المستهدفة</option>
+                  <option value="ثانوي">ثانوي</option>
+                  <option value="جامعة">جامعة</option>
+                  <option value="الكل">الكل</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>رابط صورة الكورس</label>
+                <input type="url" id="course-image" placeholder="https://example.com/image.jpg">
+              </div>
+              <button type="submit" class="btn-primary">إنشاء الكورس</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Code Modal -->
+      <div id="create-code-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>إنشاء كود اشتراك</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="createCodeForm">
+              <div class="form-group">
+                <label>الكورس</label>
+                <select id="code-course" required>
+                  <option value="">اختر الكورس</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>الكود</label>
+                <input type="text" id="code-value" required>
+                <button type="button" class="btn-secondary" id="generate-code-btn">توليد كود عشوائي</button>
+              </div>
+              <div class="form-group">
+                <label>مدة الصلاحية (بالأيام)</label>
+                <input type="number" id="code-validity" min="1" value="30" required>
+              </div>
+              <div class="form-group">
+                <label>عدد مرات الاستخدام المسموح</label>
+                <input type="number" id="code-usage-limit" min="1" value="1" required>
+              </div>
+              <button type="submit" class="btn-primary">إنشاء الكود</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Code Modal -->
+      <div id="edit-code-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>تعديل كود الاشتراك</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="editCodeForm">
+              <div class="form-group">
+                <label>الكود</label>
+                <input type="text" id="edit-code-value" required>
+              </div>
+              <div class="form-group">
+                <label>مدة الصلاحية (بالأيام)</label>
+                <input type="number" id="edit-code-validity" min="1" required>
+              </div>
+              <div class="form-group">
+                <label>عدد مرات الاستخدام المسموح</label>
+                <input type="number" id="edit-code-usage-limit" min="1" required>
+              </div>
+              <button type="submit" class="btn-primary">حفظ التغييرات</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit User Role Modal -->
+      <div id="edit-user-role-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>تعديل دور المستخدم</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="editUserRoleForm">
+              <div class="form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="edit-user-name" readonly>
+              </div>
+              <div class="form-group">
+                <label>الدور الجديد</label>
+                <select id="edit-user-role" required>
+                  <option value="student">طالب</option>
+                  <option value="instructor">مدرب</option>
+                  <option value="admin">أدمن</option>
+                </select>
+              </div>
+              <button type="submit" class="btn-primary">حفظ التغييرات</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manage Lectures Modal -->
+      <div id="manage-lectures-modal" class="modal large-modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>إدارة المحاضرات</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-actions">
+              <button class="btn-primary" onclick="showCreateLectureModal()">إضافة محاضرة جديدة</button>
+            </div>
+            <div id="lectures-list" class="lectures-list">
+              <!-- Lectures will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Lecture Modal -->
+      <div id="create-lecture-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>إضافة محاضرة جديدة</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="createLectureForm">
+              <div class="form-group">
+                <label>عنوان المحاضرة</label>
+                <input type="text" id="lecture-title" required>
+              </div>
+              <div class="form-group">
+                <label>وصف المحاضرة</label>
+                <textarea id="lecture-description" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label>مدة المحاضرة (بالدقائق)</label>
+                <input type="number" id="lecture-duration" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label>ترتيب المحاضرة</label>
+                <input type="number" id="lecture-order" min="0" value="0">
+              </div>
+              <button type="submit" class="btn-primary">إضافة المحاضرة</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manage Materials Modal -->
+      <div id="manage-materials-modal" class="modal large-modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>إدارة المواد</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-actions">
+              <button class="btn-primary" onclick="showCreateMaterialModal()">إضافة مادة جديدة</button>
+            </div>
+            <div id="materials-list" class="materials-list">
+              <!-- Materials will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Material Modal -->
+      <div id="create-material-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>إضافة مادة جديدة</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="createMaterialForm">
+              <div class="form-group">
+                <label>عنوان المادة</label>
+                <input type="text" id="material-title" required>
+              </div>
+              <div class="form-group">
+                <label>نوع المادة</label>
+                <select id="material-type" required>
+                  <option value="">اختر نوع المادة</option>
+                  <option value="video">فيديو</option>
+                  <option value="pdf">ملف PDF</option>
+                  <option value="document">مستند</option>
+                  <option value="image">صورة</option>
+                  <option value="audio">ملف صوتي</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>رابط المادة</label>
+                <input type="url" id="material-url" placeholder="https://example.com/file.pdf" required>
+                <small>يمكنك إضافة رابط يوتيوب، رابط ملف PDF، أو أي رابط آخر</small>
+              </div>
+              <div class="form-group">
+                <label>مدة المادة (بالدقائق) - للفيديوهات والصوتيات فقط</label>
+                <input type="number" id="material-duration" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label>ترتيب المادة</label>
+                <input type="number" id="material-order" min="0" value="0">
+              </div>
+              <button type="submit" class="btn-primary">إضافة المادة</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="js/supabase.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
