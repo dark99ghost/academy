@@ -721,7 +721,7 @@ function displayCourseContent(course) {
       <h4>المحاضرات</h4>
       ${sortedLectures.map((lecture, index) => `
         <div class="lecture-sidebar-item ${index === 0 ? 'active' : ''}" 
-             onclick="selectLecture('${lecture.id}')">
+             onclick="selectLecture('${lecture.id}', this)">
           <h6>${lecture.title}</h6>
           <p>${lecture.duration || 0} دقيقة</p>
         </div>
@@ -740,7 +740,8 @@ function displayCourseContent(course) {
   }
 }
 
-async function selectLecture(lectureId) {
+// إصلاح دالة selectLecture لحل مشكلة event.target
+async function selectLecture(lectureId, clickedElement = null) {
   try {
     // Find lecture in current course
     const lecture = currentCourse.lectures.find(l => l.id === lectureId);
@@ -757,11 +758,20 @@ async function selectLecture(lectureId) {
       item.classList.remove('active');
     });
     
-    event.target.closest('.lecture-sidebar-item').classList.add('active');
+    // إضافة الفئة النشطة للعنصر المحدد
+    if (clickedElement) {
+      clickedElement.classList.add('active');
+    } else {
+      // إذا لم يتم تمرير العنصر، ابحث عنه باستخدام lectureId
+      const targetElement = document.querySelector(`[onclick*="${lectureId}"]`);
+      if (targetElement) {
+        targetElement.classList.add('active');
+      }
+    }
     
   } catch (error) {
     console.error('Error selecting lecture:', error);
-    alert('خطأ في تحميل المحاضرة');
+    alert('خطأ في تحميل المحاضرة: ' + error.message);
   }
 }
 
