@@ -508,16 +508,17 @@ body {
   border-top: 1px solid var(--border-color);
 }
 
-/* تصميم جديد لمحتوى الكورس */
+/* تصميم جديد لمحتوى الكورس - محسن للعرض بالحجم الكامل */
 .course-layout {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr 280px;
   grid-template-rows: 1fr auto;
-  gap: 20px;
-  height: 80vh;
+  gap: 15px;
+  height: 90vh;
   grid-template-areas: 
     "main sidebar"
     "materials sidebar";
+  padding: 0 20px;
 }
 
 .main-content-area {
@@ -526,14 +527,16 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
 .course-sidebar {
   grid-area: sidebar;
   background: var(--light-color);
   border-radius: var(--border-radius);
-  padding: 20px;
+  padding: 15px;
   overflow-y: auto;
+  max-height: 90vh;
 }
 
 .materials-bottom-panel {
@@ -541,16 +544,17 @@ body {
   background: var(--bg-color);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: 20px;
-  max-height: 200px;
+  padding: 15px;
+  max-height: 180px;
   overflow-y: auto;
 }
 
-/* منطقة عرض المحتوى الرئيسي */
+/* منطقة عرض المحتوى الرئيسي - محسنة للحجم الكامل */
 #material-viewer {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 70vh;
 }
 
 .welcome-message {
@@ -584,18 +588,20 @@ body {
   font-style: italic;
 }
 
-/* عرض المواد */
+/* عرض المواد - محسن للحجم الكامل */
 .material-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
+  padding: 15px 20px;
   border-bottom: 1px solid var(--border-color);
+  background: var(--light-color);
 }
 
 .material-header h3 {
   color: var(--text-color);
   margin: 0;
+  font-size: 18px;
 }
 
 .material-type-badge {
@@ -608,39 +614,56 @@ body {
 }
 
 .material-content {
-  padding: 20px;
-  height: calc(100% - 80px);
+  padding: 0;
+  height: calc(100% - 60px);
+  display: flex;
+  flex-direction: column;
 }
 
-/* مشغل الفيديو */
+/* مشغل الفيديو - الحجم الكامل */
 .video-player {
   width: 100%;
   height: 100%;
-  min-height: 400px;
+  min-height: 500px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  border-radius: 0;
 }
 
 .video-player iframe {
   width: 100%;
   height: 100%;
-  border-radius: var(--border-radius);
+  border: none;
+  border-radius: 0;
+  min-height: 500px;
 }
 
-/* عارض الملفات */
+.video-player video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+/* عارض الملفات - محسن للحجم الكامل */
 .file-viewer {
+  height: 100%;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  text-align: center;
+  background: var(--light-color);
 }
 
 .file-info {
+  text-align: center;
   margin-bottom: 30px;
 }
 
 .file-icon-large {
-  font-size: 64px;
+  font-size: 80px;
   color: var(--primary-color);
   margin-bottom: 20px;
 }
@@ -648,45 +671,84 @@ body {
 .file-info h4 {
   color: var(--text-color);
   margin-bottom: 10px;
+  font-size: 24px;
 }
 
 .file-info p {
   color: var(--secondary-color);
   margin-bottom: 5px;
+  font-size: 16px;
 }
 
 .file-actions {
   display: flex;
   gap: 15px;
+  justify-content: center;
+  margin-bottom: 30px;
 }
 
 .file-actions .btn-primary,
 .file-actions .btn-secondary {
   width: auto;
-  padding: 12px 24px;
+  padding: 15px 30px;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 16px;
 }
 
-/* الشريط الجانبي للمحاضرات */
+/* عرض الملف في الحجم الكامل */
+.file-preview {
+  flex: 1;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.file-preview iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  min-height: 400px;
+}
+
+.file-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.file-preview embed,
+.file-preview object {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+/* الشريط الجانبي للمحاضرات - محسن */
 .course-sidebar h4 {
   color: var(--text-color);
   margin-bottom: 15px;
   text-align: center;
   border-bottom: 2px solid var(--primary-color);
   padding-bottom: 10px;
+  font-size: 16px;
 }
 
 .lectures-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .lecture-sidebar-item {
   background: var(--bg-color);
-  padding: 15px;
+  padding: 12px;
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: var(--transition);
@@ -705,20 +767,20 @@ body {
 
 .lecture-sidebar-item h6 {
   margin-bottom: 5px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .lecture-sidebar-item p {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.8;
   margin-bottom: 5px;
 }
 
 .materials-count {
-  font-size: 11px;
+  font-size: 10px;
   background: rgba(255, 255, 255, 0.2);
-  padding: 2px 8px;
-  border-radius: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
   display: inline-block;
 }
 
@@ -726,7 +788,7 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* لوحة المواد في الأسفل */
+/* لوحة المواد في الأسفل - محسنة */
 .materials-header {
   margin-bottom: 15px;
 }
@@ -739,20 +801,20 @@ body {
 
 .materials-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
 }
 
 .material-card {
   background: var(--light-color);
   border: 2px solid transparent;
   border-radius: var(--border-radius);
-  padding: 15px;
+  padding: 12px;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .material-card:hover {
@@ -767,7 +829,7 @@ body {
 }
 
 .material-icon {
-  font-size: 24px;
+  font-size: 20px;
   color: var(--primary-color);
   flex-shrink: 0;
 }
@@ -783,7 +845,7 @@ body {
 
 .material-info h6 {
   margin: 0 0 5px 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -791,13 +853,13 @@ body {
 }
 
 .material-type {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.8;
   margin: 0;
 }
 
 .material-duration {
-  font-size: 11px;
+  font-size: 10px;
   opacity: 0.7;
   margin: 2px 0 0 0;
 }
@@ -1188,7 +1250,65 @@ body {
   margin-bottom: 20px;
 }
 
+/* وضع ملء الشاشة للفيديو */
+.fullscreen-video {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  background: #000 !important;
+  border-radius: 0 !important;
+}
+
+.fullscreen-video iframe,
+.fullscreen-video video {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+/* زر ملء الشاشة */
+.fullscreen-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 10;
+  transition: var(--transition);
+}
+
+.fullscreen-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .course-layout {
+    grid-template-columns: 1fr 250px;
+    height: 85vh;
+  }
+  
+  .main-content-area {
+    min-height: 60vh;
+  }
+  
+  .video-player {
+    min-height: 400px;
+  }
+  
+  .video-player iframe {
+    min-height: 400px;
+  }
+}
+
 @media (max-width: 768px) {
   .nav-container {
     flex-direction: column;
@@ -1245,33 +1365,40 @@ body {
     flex-direction: column;
   }
 
-  /* تصميم متجاوب للكورس */
+  /* تصميم متجاوب للكورس - محسن للموبايل */
   .course-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto 1fr auto;
     grid-template-areas: 
       "sidebar"
       "main"
       "materials";
     height: auto;
+    min-height: 100vh;
+    padding: 10px;
+    gap: 10px;
   }
 
   .course-sidebar {
-    max-height: 200px;
+    max-height: 150px;
     order: 1;
+    padding: 10px;
   }
 
   .main-content-area {
-    min-height: 300px;
+    min-height: 50vh;
     order: 2;
   }
 
   .materials-bottom-panel {
     order: 3;
+    max-height: 150px;
+    padding: 10px;
   }
 
   .materials-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 
   .search-container {
@@ -1286,6 +1413,22 @@ body {
   .admin-actions,
   .instructor-actions {
     justify-content: flex-start;
+  }
+  
+  .video-player {
+    min-height: 300px;
+  }
+  
+  .video-player iframe {
+    min-height: 300px;
+  }
+  
+  .file-preview {
+    min-height: 300px;
+  }
+  
+  .file-preview iframe {
+    min-height: 300px;
   }
 }
 
