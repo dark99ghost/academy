@@ -1015,18 +1015,27 @@ async function handleCreateCourse(e) {
   const targetLevel = document.getElementById('course-target-level').value;
   const imageUrl = document.getElementById('course-image').value;
   
+  console.log('Form data:', { title, description, price, targetLevel, imageUrl });
+  
   try {
-    const { data, error } = await createCourse({
+    const courseData = {
       title,
       description,
       price,
       target_level: targetLevel,
       image_url: imageUrl || null
-    });
+    };
+    
+    console.log('Sending course data:', courseData);
+    
+    const { data, error } = await createCourse(courseData);
     
     if (error) {
+      console.error('Create course error:', error);
       throw error;
     }
+    
+    console.log('Course created successfully:', data);
     
     alert('تم إنشاء الكورس بنجاح!');
     closeModal();
