@@ -135,13 +135,13 @@ async function updateRoleVisibility() {
   const hasInstructorRole = await hasAdminOrInstructorRole(currentUser.id);
   
   // Show/hide admin links
-  const adminLinks = document.querySelectorAll('#admin-link, #admin-dropdown-link');
+  const adminLinks = document.querySelectorAll('#admin-dropdown-link');
   adminLinks.forEach(link => {
     link.style.display = isUserAdmin ? 'block' : 'none';
   });
   
   // Show/hide instructor links
-  const instructorLinks = document.querySelectorAll('#instructor-link, #instructor-dropdown-link');
+  const instructorLinks = document.querySelectorAll('#instructor-dropdown-link');
   instructorLinks.forEach(link => {
     link.style.display = (hasInstructorRole && !isUserAdmin) ? 'block' : 'none';
   });
@@ -149,8 +149,9 @@ async function updateRoleVisibility() {
 
 // Navigation
 function updateNavigation() {
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
+  // Handle dropdown navigation links
+  const dropdownLinks = document.querySelectorAll('.dropdown-menu a[data-page]');
+  dropdownLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const page = link.getAttribute('data-page');
@@ -174,15 +175,6 @@ function showPage(pageId) {
   if (targetPage) {
     targetPage.classList.add('active');
   }
-  
-  // Update navigation active state
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('data-page') === pageId) {
-      link.classList.add('active');
-    }
-  });
   
   // Load page-specific data
   switch (pageId) {
