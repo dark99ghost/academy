@@ -42,6 +42,7 @@ let currentCourse = null;
 let currentLecture = null;
 let currentCourseId = null;
 let currentLectureId = null;
+let modalEventListenersAdded = false; // منع تكرار إضافة event listeners
 
 // DOM Elements
 const loadingContainer = document.getElementById('loading');
@@ -271,16 +272,20 @@ function setupEventListeners() {
   // Theme toggle
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   
-  // Modal close
-  document.querySelectorAll('.modal-close').forEach(btn => {
-    btn.addEventListener('click', closeModal);
-  });
-  
-  modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) {
-      closeModal();
-    }
-  });
+  // Modal close - إضافة فقط مرة واحدة
+  if (!modalEventListenersAdded) {
+    document.querySelectorAll('.modal-close').forEach(btn => {
+      btn.addEventListener('click', closeModal);
+    });
+    
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+    
+    modalEventListenersAdded = true;
+  }
   
   // Course subscription
   document.getElementById('subscriptionForm').addEventListener('submit', handleCourseSubscription);
@@ -1297,7 +1302,14 @@ function editUserRole(userId, userName, currentRole) {
   showModal('edit-user-role-modal');
 }
 
+// إصلاح دالة manageLectures لمنع تكرار النوافذ
 async function manageLectures(courseId) {
+  // التأكد من إغلاق أي نوافذ مفتوحة أولاً
+  closeModal();
+  
+  // انتظار قصير للتأكد من إغلاق النوافذ
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
   currentCourseId = courseId;
   
   // تحميل بيانات الكورس مع المحاضرات
@@ -1310,6 +1322,8 @@ async function manageLectures(courseId) {
     
     currentCourse = course;
     displayLecturesList(course.lectures || []);
+    
+    // عرض النافذة مرة واحدة فقط
     showModal('manage-lectures-modal');
     
   } catch (error) {
@@ -1361,7 +1375,14 @@ function displayLecturesList(lectures) {
   `).join('');
 }
 
+// إصلاح دالة manageMaterials لمنع تكرار النوافذ
 async function manageMaterials(lectureId) {
+  // التأكد من إغلاق أي نوافذ مفتوحة أولاً
+  closeModal();
+  
+  // انتظار قصير للتأكد من إغلاق النوافذ
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
   currentLectureId = lectureId;
   
   // العثور على المحاضرة في الكورس الحالي
@@ -1373,6 +1394,7 @@ async function manageMaterials(lectureId) {
     document.getElementById('materials-list').innerHTML = '<p>لا توجد مواد</p>';
   }
   
+  // عرض النافذة مرة واحدة فقط
   showModal('manage-materials-modal');
 }
 
@@ -1465,13 +1487,19 @@ async function deleteMaterialAdmin(materialId) {
   }
 }
 
-// Modal functions
+// Modal functions - إصلاح لمنع تكرار النوافذ
 function showModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modalOverlay.classList.add('active');
-    modal.style.display = 'block';
-  }
+  // إغلاق جميع النوافذ أولاً
+  closeModal();
+  
+  // انتظار قصير ثم عرض النافذة المطلوبة
+  setTimeout(() => {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modalOverlay.classList.add('active');
+      modal.style.display = 'block';
+    }
+  }, 50);
 }
 
 function closeModal() {
