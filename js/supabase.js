@@ -208,13 +208,32 @@ export async function getCourse(courseId) {
 
 export async function createCourse(courseData) {
   try {
+    console.log('Creating course with data:', courseData);
+    
+    // التأكد من وجود جميع الحقول المطلوبة
+    const courseToCreate = {
+      title: courseData.title,
+      description: courseData.description,
+      price: courseData.price,
+      image_url: courseData.image_url || null,
+      target_level: courseData.target_level || 'الكل',
+      is_active: true
+    };
+    
+    console.log('Final course data:', courseToCreate);
+    
     const { data, error } = await supabase
       .from('courses')
-      .insert([courseData])
+      .insert([courseToCreate])
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Course creation error:', error);
+      throw error;
+    }
+    
+    console.log('Course created successfully:', data);
     return { data, error: null };
   } catch (error) {
     console.error('Error creating course:', error);
