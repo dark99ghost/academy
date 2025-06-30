@@ -622,8 +622,8 @@ body {
 
 /* مشغل الفيديو - الحجم الكامل */
 .video-player {
-  width: 100%;
-  height: 100%;
+  width: 60vh;
+  height: 50vh;
   min-height: 500px;
   flex: 1;
   display: flex;
