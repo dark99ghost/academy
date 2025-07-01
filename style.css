@@ -544,6 +544,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: 20px;
+  margin-bottom:100px;
   max-height: 200px;
   overflow-y: auto;
 }
