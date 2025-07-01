@@ -626,7 +626,7 @@ body {
 
 /* مشغل الفيديو محسن */
 .video-player {
-  width: 100%;
+  width: 100vh;
   height: 100%;
   display: flex;
   align-items: center;
