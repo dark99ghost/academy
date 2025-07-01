@@ -849,7 +849,7 @@ body {
   transition: var(--transition);
   display: flex;
   align-items: center;
-  margin-top: 1000px;
+  margin-bottom: 1000px;
   gap: 12px;
 }
 
