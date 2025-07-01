@@ -849,7 +849,8 @@ body {
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 100px;
+  margin-top: 1000px;
+  gap: 12px;
 }
 
 .material-card:hover {
