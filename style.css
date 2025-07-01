@@ -627,7 +627,7 @@ body {
 /* مشغل الفيديو محسن */
 .video-player {
   width: 100%;
-  height: 500vh;
+  height: 2000vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -637,7 +637,7 @@ body {
 
 .video-player iframe {
   width: 100%;
-  height: 200vh;
+  height: 2000vh;
   border: none;
 
 }
