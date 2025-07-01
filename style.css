@@ -281,7 +281,7 @@ body {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 80px;
+  gap: 15px;
 }
 
 .theme-btn {
@@ -314,7 +314,6 @@ body {
   cursor: pointer;
   border: 2px solid var(--border-color);
   transition: var(--transition);
-  vertical-align: middle;
 }
 
 .user-avatar:hover {
@@ -509,13 +508,13 @@ body {
   border-top: 1px solid var(--border-color);
 }
 
-/* تصميم جديد لمحتوى الكورس */
+/* تصميم محسن لمحتوى الكورس */
 .course-layout {
   display: grid;
   grid-template-columns: 1fr 300px;
   grid-template-rows: 1fr auto;
   gap: 20px;
-  height: 80vh;
+  height: 85vh;
   grid-template-areas: 
     "main sidebar"
     "materials sidebar";
@@ -527,6 +526,8 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .course-sidebar {
@@ -547,11 +548,12 @@ body {
   overflow-y: auto;
 }
 
-/* منطقة عرض المحتوى الرئيسي */
+/* منطقة عرض المحتوى الرئيسي محسنة */
 #material-viewer {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .welcome-message {
@@ -567,6 +569,10 @@ body {
 .lecture-info {
   padding: 40px;
   text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .lecture-info h3 {
@@ -585,18 +591,21 @@ body {
   font-style: italic;
 }
 
-/* عرض المواد */
+/* عرض المواد محسن */
 .material-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
+  padding: 15px 20px;
   border-bottom: 1px solid var(--border-color);
+  background: var(--light-color);
+  flex-shrink: 0;
 }
 
 .material-header h3 {
   color: var(--text-color);
   margin: 0;
+  font-size: 18px;
 }
 
 .material-type-badge {
@@ -609,24 +618,32 @@ body {
 }
 
 .material-content {
-  padding: 20px;
-  height: calc(100% - 80px);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-/* مشغل الفيديو */
+/* مشغل الفيديو محسن */
 .video-player {
   width: 100%;
-  height: 1000vh;
-  min-height: 1000vh;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  position: relative;
 }
 
 .video-player iframe {
   width: 100%;
-  height: 1000vh;
-  border-radius: var(--border-radius);
+  height: 100%;
+  border: none;
+  max-width: 100%;
+  max-height: 100%;
 }
 
-/* عارض الملفات */
+/* عارض الملفات محسن */
 .file-viewer {
   display: flex;
   flex-direction: column;
@@ -634,6 +651,8 @@ body {
   justify-content: center;
   height: 100%;
   text-align: center;
+  padding: 40px;
+  background: var(--light-color);
 }
 
 .file-info {
@@ -649,16 +668,20 @@ body {
 .file-info h4 {
   color: var(--text-color);
   margin-bottom: 10px;
+  font-size: 24px;
 }
 
 .file-info p {
   color: var(--secondary-color);
   margin-bottom: 5px;
+  font-size: 16px;
 }
 
 .file-actions {
   display: flex;
   gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .file-actions .btn-primary,
@@ -668,6 +691,80 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 16px;
+  min-width: 150px;
+}
+
+/* عارض PDF مدمج */
+.pdf-viewer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-viewer iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  flex: 1;
+}
+
+.pdf-viewer embed {
+  width: 100%;
+  height: 100%;
+  border: none;
+  flex: 1;
+}
+
+/* عارض الصور */
+.image-viewer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--light-color);
+  padding: 20px;
+}
+
+.image-viewer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+/* عارض الصوت */
+.audio-viewer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--light-color);
+  padding: 40px;
+}
+
+.audio-viewer audio {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 20px;
+}
+
+.audio-info {
+  text-align: center;
+}
+
+.audio-info h4 {
+  color: var(--text-color);
+  margin-bottom: 10px;
+}
+
+.audio-info p {
+  color: var(--secondary-color);
 }
 
 /* الشريط الجانبي للمحاضرات */
@@ -1246,15 +1343,16 @@ body {
     flex-direction: column;
   }
 
-  /* تصميم متجاوب للكورس */
+  /* تصميم متجاوب محسن للكورس */
   .course-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto 1fr auto;
     grid-template-areas: 
       "sidebar"
       "main"
       "materials";
     height: auto;
+    min-height: 80vh;
   }
 
   .course-sidebar {
@@ -1263,12 +1361,13 @@ body {
   }
 
   .main-content-area {
-    min-height: 300px;
+    min-height: 400px;
     order: 2;
   }
 
   .materials-bottom-panel {
     order: 3;
+    max-height: 150px;
   }
 
   .materials-grid {
@@ -1287,6 +1386,28 @@ body {
   .admin-actions,
   .instructor-actions {
     justify-content: flex-start;
+  }
+
+  /* تحسينات إضافية للموبايل */
+  .file-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .file-actions .btn-primary,
+  .file-actions .btn-secondary {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .material-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .video-player {
+    min-height: 250px;
   }
 }
 
