@@ -388,273 +388,138 @@ body {
 .courses-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-/* منطقة عرض المحتوى الرئيسي محسنة */
-.material-viewer {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-  padding: 10px;
+  gap: 30px;
+  margin-top: 40px;
 }
 
-.welcome-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  text-align: center;
-  color: var(--secondary-color);
+.course-card {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.course-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.course-content {
   padding: 20px;
 }
 
-.lecture-info {
-  padding: 30px;
-  text-align: center;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 15px;
+.course-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text-color);
 }
 
-.lecture-info h3 {
+.course-description {
+  color: var(--secondary-color);
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.course-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+}
+
+.course-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.course-actions .btn-primary,
+.course-actions .btn-secondary {
+  flex: 1;
+  width: auto;
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+/* Course Preview and Content Styles */
+.course-preview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.course-preview-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+}
+
+.course-info h4 {
   color: var(--text-color);
   margin-bottom: 10px;
 }
 
-.lecture-description {
-  color: var(--secondary-color);
+.course-lectures h5 {
+  color: var(--text-color);
   margin-bottom: 15px;
-  line-height: 1.7;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 5px;
 }
 
-.select-material-hint {
-  color: var(--primary-color);
-  font-style: italic;
+.lecture-preview-item {
+  background: var(--light-color);
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 10px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.lecture-preview-item h6 {
+  color: var(--text-color);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lecture-preview-item p {
+  color: var(--secondary-color);
+  margin-bottom: 5px;
   font-size: 14px;
 }
 
-/* عرض المواد محسن */
-.material-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--light-color);
-  flex-shrink: 0;
-}
-
-.material-header h3 {
-  color: var(--text-color);
-  margin: 0;
-  font-size: 16px;
-}
-
-.material-type-badge {
-  background: var(--primary-color);
-  color: white;
-  padding: 3px 10px;
-  border-radius: 16px;
-  font-size: 11px;
+.lecture-duration {
+  color: var(--primary-color);
   font-weight: 500;
 }
 
-.material-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-  min-height: 0;
+.materials-preview {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
 }
 
-/* مشغل الفيديو محسن */
-.video-player {
-  width: 100%;
-  height: 100%;
-  max-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000;
-  position: relative;
+/* تصميم محسن لمحتوى الكورس - تحسين حجم الفيديو */
+.course-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-rows: 1fr auto;
+  gap: 20px;
+  height: 90vh; /* زيادة الارتفاع */
+  grid-template-areas: 
+    "main sidebar"
+    "materials sidebar";
 }
 
-.video-player iframe {
-  width: 100%;
-  height: 100%;
-  max-height: 80vh;
-  border: none;
-}
-
-/* عارض الملفات محسن */
-.file-viewer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  text-align: center;
-  padding: 30px;
-  background: var(--light-color);
-  overflow: auto;
-}
-
-.file-info {
-  margin-bottom: 20px;
-}
-
-.file-icon-large {
-  font-size: 56px;
-  color: var(--primary-color);
-  margin-bottom: 15px;
-}
-
-.file-info h4 {
-  color: var(--text-color);
-  margin-bottom: 8px;
-  font-size: 22px;
-}
-
-.file-info p {
-  color: var(--secondary-color);
-  margin-bottom: 4px;
-  font-size: 14px;
-}
-
-.file-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.file-actions .btn-primary,
-.file-actions .btn-secondary {
-  width: auto;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  min-width: 140px;
-}
-
-/* عارض PDF مدمج */
-.pdf-viewer {
-  width: 100%;
-  height: 100%;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.pdf-viewer iframe,
-.pdf-viewer embed {
-  width: 100%;
-  height: 100%;
-  max-height: 80vh;
-  border: none;
-  flex: 1;
-}
-
-/* عارض الصور */
-.image-viewer {
-  width: 100%;
-  height: 100%;
-  max-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--light-color);
-  padding: 15px;
-  overflow: auto;
-}
-
-.image-viewer img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-}
-
-/* عارض الصوت */
-.audio-viewer {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--light-color);
-  padding: 30px;
-  overflow: auto;
-}
-
-.audio-viewer audio {
-  width: 100%;
-  max-width: 450px;
-  margin-bottom: 15px;
-}
-
-.audio-info {
-  text-align: center;
-}
-
-.audio-info h4 {
-  color: var(--text-color);
-  margin-bottom: 8px;
-}
-
-.audio-info p {
-  color: var(--secondary-color);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .video-player,
-  .pdf-viewer,
-  .image-viewer {
-    max-height: 60vh;
-  }
-
-  .video-player iframe,
-  .pdf-viewer iframe,
-  .pdf-viewer embed {
-    max-height: 60vh;
-  }
-
-  .file-viewer,
-  .audio-viewer {
-    padding: 20px;
-  }
-
-  .file-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .file-actions .btn-primary,
-  .file-actions .btn-secondary {
-    width: 100%;
-    max-width: 220px;
-  }
-
-  .material-header {
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
-    padding: 10px;
-  }
-
-  .lecture-info {
-    padding: 20px;
-    gap: 10px;
-  }
-}
 .main-content-area {
   grid-area: main;
   background: var(--bg-color);
@@ -663,6 +528,7 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 600px; /* ارتفاع أدنى أكبر */
 }
 
 .course-sidebar {
@@ -679,8 +545,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: 20px;
-  margin-bottom:100px;
-  max-height: 200px;
+  max-height: 250px; /* زيادة الارتفاع */
   overflow-y: auto;
 }
 
@@ -760,22 +625,24 @@ body {
   overflow: hidden;
 }
 
-/* مشغل الفيديو محسن */
+/* مشغل الفيديو محسن - تحسين كبير للحجم */
 .video-player {
   width: 100%;
-  height: 200vh;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #000;
   position: relative;
+  min-height: 500px; /* ارتفاع أدنى أكبر */
 }
 
 .video-player iframe {
   width: 100%;
-  height: 200vh;
+  height: 100%;
   border: none;
-
+  min-height: 500px; /* ارتفاع أدنى للإطار */
+  aspect-ratio: 16/9; /* نسبة عرض إلى ارتفاع مثالية للفيديو */
 }
 
 /* عارض الملفات محسن */
@@ -788,6 +655,7 @@ body {
   text-align: center;
   padding: 40px;
   background: var(--light-color);
+  min-height: 400px;
 }
 
 .file-info {
@@ -795,7 +663,7 @@ body {
 }
 
 .file-icon-large {
-  font-size: 64px;
+  font-size: 80px; /* أيقونة أكبر */
   color: var(--primary-color);
   margin-bottom: 20px;
 }
@@ -803,13 +671,13 @@ body {
 .file-info h4 {
   color: var(--text-color);
   margin-bottom: 10px;
-  font-size: 24px;
+  font-size: 28px; /* نص أكبر */
 }
 
 .file-info p {
   color: var(--secondary-color);
   margin-bottom: 5px;
-  font-size: 16px;
+  font-size: 18px; /* نص أكبر */
 }
 
 .file-actions {
@@ -822,20 +690,21 @@ body {
 .file-actions .btn-primary,
 .file-actions .btn-secondary {
   width: auto;
-  padding: 12px 24px;
+  padding: 15px 30px; /* أزرار أكبر */
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
-  min-width: 150px;
+  font-size: 18px; /* نص أكبر */
+  min-width: 180px;
 }
 
-/* عارض PDF مدمج */
+/* عارض PDF مدمج محسن */
 .pdf-viewer {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 600px; /* ارتفاع أدنى أكبر */
 }
 
 .pdf-viewer iframe {
@@ -843,6 +712,7 @@ body {
   height: 100%;
   border: none;
   flex: 1;
+  min-height: 600px; /* ارتفاع أدنى للإطار */
 }
 
 .pdf-viewer embed {
@@ -850,9 +720,10 @@ body {
   height: 100%;
   border: none;
   flex: 1;
+  min-height: 600px; /* ارتفاع أدنى للإطار */
 }
 
-/* عارض الصور */
+/* عارض الصور محسن */
 .image-viewer {
   width: 100%;
   height: 100%;
@@ -861,6 +732,7 @@ body {
   justify-content: center;
   background: var(--light-color);
   padding: 20px;
+  min-height: 500px; /* ارتفاع أدنى أكبر */
 }
 
 .image-viewer img {
@@ -871,7 +743,7 @@ body {
   box-shadow: var(--shadow);
 }
 
-/* عارض الصوت */
+/* عارض الصوت محسن */
 .audio-viewer {
   width: 100%;
   height: 100%;
@@ -881,12 +753,14 @@ body {
   justify-content: center;
   background: var(--light-color);
   padding: 40px;
+  min-height: 400px; /* ارتفاع أدنى أكبر */
 }
 
 .audio-viewer audio {
   width: 100%;
-  max-width: 500px;
-  margin-bottom: 20px;
+  max-width: 600px; /* عرض أكبر */
+  margin-bottom: 30px;
+  height: 60px; /* ارتفاع أكبر لمشغل الصوت */
 }
 
 .audio-info {
@@ -896,10 +770,12 @@ body {
 .audio-info h4 {
   color: var(--text-color);
   margin-bottom: 10px;
+  font-size: 24px; /* نص أكبر */
 }
 
 .audio-info p {
   color: var(--secondary-color);
+  font-size: 16px; /* نص أكبر */
 }
 
 /* الشريط الجانبي للمحاضرات */
@@ -985,7 +861,6 @@ body {
   transition: var(--transition);
   display: flex;
   align-items: center;
-  margin-bottom: 1000px;
   gap: 12px;
 }
 
@@ -1479,7 +1354,7 @@ body {
     flex-direction: column;
   }
 
-  /* تصميم متجاوب محسن للكورس */
+  /* تصميم متجاوب محسن للكورس - تحسين للموبايل */
   .course-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr auto;
@@ -1488,7 +1363,7 @@ body {
       "main"
       "materials";
     height: auto;
-    min-height: 80vh;
+    min-height: 90vh; /* زيادة الارتفاع على الموبايل */
   }
 
   .course-sidebar {
@@ -1497,13 +1372,13 @@ body {
   }
 
   .main-content-area {
-    min-height: 400px;
+    min-height: 500px; /* ارتفاع أدنى أكبر على الموبايل */
     order: 2;
   }
 
   .materials-bottom-panel {
     order: 3;
-    max-height: 150px;
+    max-height: 200px;
   }
 
   .materials-grid {
@@ -1543,7 +1418,29 @@ body {
   }
 
   .video-player {
-    min-height: 250px;
+    min-height: 300px; /* ارتفاع أدنى للفيديو على الموبايل */
+  }
+
+  .video-player iframe {
+    min-height: 300px; /* ارتفاع أدنى للإطار على الموبايل */
+  }
+
+  .pdf-viewer,
+  .pdf-viewer iframe,
+  .pdf-viewer embed {
+    min-height: 400px; /* ارتفاع أدنى للـ PDF على الموبايل */
+  }
+
+  .image-viewer {
+    min-height: 300px; /* ارتفاع أدنى للصور على الموبايل */
+  }
+
+  .audio-viewer {
+    min-height: 250px; /* ارتفاع أدنى للصوت على الموبايل */
+  }
+
+  .file-viewer {
+    min-height: 300px; /* ارتفاع أدنى لعارض الملفات على الموبايل */
   }
 }
 
