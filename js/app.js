@@ -30,7 +30,6 @@ import {
   isAdmin,
   hasAdminOrInstructorRole,
   uploadAvatar,
-  uploadVideo,
   checkUserCourseAccess,
   getYouTubeEmbedUrl,
   getRoleDisplayName
@@ -136,13 +135,13 @@ async function updateRoleVisibility() {
   const hasInstructorRole = await hasAdminOrInstructorRole(currentUser.id);
   
   // Show/hide admin links
-  const adminLinks = document.querySelectorAll('#admin-link, #admin-dropdown-link');
+  const adminLinks = document.querySelectorAll('#admin-dropdown-link');
   adminLinks.forEach(link => {
     link.style.display = isUserAdmin ? 'block' : 'none';
   });
   
   // Show/hide instructor links
-  const instructorLinks = document.querySelectorAll('#instructor-link, #instructor-dropdown-link');
+  const instructorLinks = document.querySelectorAll('#instructor-dropdown-link');
   instructorLinks.forEach(link => {
     link.style.display = (hasInstructorRole && !isUserAdmin) ? 'block' : 'none';
   });
@@ -150,8 +149,9 @@ async function updateRoleVisibility() {
 
 // Navigation
 function updateNavigation() {
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
+  // Handle dropdown navigation links
+  const dropdownLinks = document.querySelectorAll('.dropdown-menu a[data-page]');
+  dropdownLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const page = link.getAttribute('data-page');
@@ -175,15 +175,6 @@ function showPage(pageId) {
   if (targetPage) {
     targetPage.classList.add('active');
   }
-  
-  // Update navigation active state
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('data-page') === pageId) {
-      link.classList.add('active');
-    }
-  });
   
   // Load page-specific data
   switch (pageId) {
@@ -327,117 +318,6 @@ function setupEventListeners() {
       handleUserSearch();
     }
   });
-
-  // Video upload method selection
-  setupVideoUploadListeners();
-}
-
-// إعداد مستمعي أحداث رفع الفيديو
-function setupVideoUploadListeners() {
-  const materialTypeSelect = document.getElementById('material-type');
-  const videoUploadOptions = document.getElementById('video-upload-options');
-  const videoUrlInput = document.getElementById('video-url-input');
-  const videoFileInput = document.getElementById('video-file-input');
-  const materialUrlInput = document.getElementById('material-url');
-  
-  // عرض خيارات رفع الفيديو عند اختيار نوع فيديو
-  materialTypeSelect.addEventListener('change', (e) => {
-    if (e.target.value === 'video') {
-      videoUploadOptions.style.display = 'block';
-      updateVideoInputVisibility();
-    } else {
-      videoUploadOptions.style.display = 'none';
-      videoUrlInput.style.display = 'block';
-      videoFileInput.style.display = 'none';
-      materialUrlInput.required = true;
-    }
-  });
-  
-  // تبديل بين رفع الرابط ورفع الملف
-  const videoMethodRadios = document.querySelectorAll('input[name="video-method"]');
-  videoMethodRadios.forEach(radio => {
-    radio.addEventListener('change', updateVideoInputVisibility);
-  });
-  
-  // رفع الفيديو من الجهاز
-  const materialFileInput = document.getElementById('material-file');
-  materialFileInput.addEventListener('change', handleVideoFileUpload);
-}
-
-function updateVideoInputVisibility() {
-  const selectedMethod = document.querySelector('input[name="video-method"]:checked').value;
-  const videoUrlInput = document.getElementById('video-url-input');
-  const videoFileInput = document.getElementById('video-file-input');
-  const materialUrlInput = document.getElementById('material-url');
-  
-  if (selectedMethod === 'url') {
-    videoUrlInput.style.display = 'block';
-    videoFileInput.style.display = 'none';
-    materialUrlInput.required = true;
-  } else {
-    videoUrlInput.style.display = 'none';
-    videoFileInput.style.display = 'block';
-    materialUrlInput.required = false;
-  }
-}
-
-async function handleVideoFileUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  
-  const progressContainer = document.getElementById('file-upload-progress');
-  const successContainer = document.getElementById('file-upload-success');
-  const placeholder = document.querySelector('.file-upload-placeholder');
-  const progressFill = document.querySelector('.progress-fill');
-  const progressText = document.querySelector('.progress-text');
-  
-  try {
-    // إخفاء العنصر النائب وإظهار شريط التقدم
-    placeholder.style.display = 'none';
-    progressContainer.style.display = 'block';
-    successContainer.style.display = 'none';
-    
-    // محاكاة تقدم الرفع (في التطبيق الحقيقي، ستحصل على التقدم الفعلي)
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-      progress += Math.random() * 15;
-      if (progress > 90) progress = 90;
-      
-      progressFill.style.width = `${progress}%`;
-      progressText.textContent = `جاري الرفع... ${Math.round(progress)}%`;
-    }, 200);
-    
-    // رفع الفيديو
-    const { data: videoUrl, error } = await uploadVideo(currentUser.id, file);
-    
-    clearInterval(progressInterval);
-    
-    if (error) {
-      throw error;
-    }
-    
-    // إكمال شريط التقدم
-    progressFill.style.width = '100%';
-    progressText.textContent = 'تم الرفع بنجاح!';
-    
-    // إظهار رسالة النجاح
-    setTimeout(() => {
-      progressContainer.style.display = 'none';
-      successContainer.style.display = 'block';
-      
-      // تحديث حقل الرابط بالرابط المرفوع
-      document.getElementById('material-url').value = videoUrl;
-    }, 1000);
-    
-  } catch (error) {
-    clearInterval(progressInterval);
-    console.error('Error uploading video:', error);
-    
-    // إظهار رسالة خطأ
-    progressContainer.style.display = 'none';
-    placeholder.style.display = 'block';
-    alert('خطأ في رفع الفيديو: ' + error.message);
-  }
 }
 
 // Authentication handlers
@@ -1452,32 +1332,9 @@ async function handleCreateMaterial(e) {
   
   const title = document.getElementById('material-title').value;
   const type = document.getElementById('material-type').value;
+  const url = document.getElementById('material-url').value;
   const duration = parseInt(document.getElementById('material-duration').value) || 0;
   const orderIndex = parseInt(document.getElementById('material-order').value) || 0;
-  
-  let url = '';
-  
-  // تحديد الرابط حسب طريقة الرفع
-  if (type === 'video') {
-    const selectedMethod = document.querySelector('input[name="video-method"]:checked').value;
-    if (selectedMethod === 'url') {
-      url = document.getElementById('material-url').value;
-    } else {
-      // للفيديو المرفوع، الرابط موجود بالفعل في حقل material-url
-      url = document.getElementById('material-url').value;
-      if (!url) {
-        alert('يرجى رفع الفيديو أولاً');
-        return;
-      }
-    }
-  } else {
-    url = document.getElementById('material-url').value;
-  }
-  
-  if (!url) {
-    alert('يرجى إدخال رابط المادة');
-    return;
-  }
   
   try {
     const { data, error } = await createLectureMaterial({
@@ -1498,20 +1355,6 @@ async function handleCreateMaterial(e) {
     
     // Reset form
     document.getElementById('createMaterialForm').reset();
-    
-    // إخفاء خيارات رفع الفيديو
-    document.getElementById('video-upload-options').style.display = 'none';
-    document.getElementById('video-url-input').style.display = 'block';
-    document.getElementById('video-file-input').style.display = 'none';
-    
-    // إعادة تعيين منطقة رفع الملف
-    const placeholder = document.querySelector('.file-upload-placeholder');
-    const progressContainer = document.getElementById('file-upload-progress');
-    const successContainer = document.getElementById('file-upload-success');
-    
-    placeholder.style.display = 'block';
-    progressContainer.style.display = 'none';
-    successContainer.style.display = 'none';
     
     // Reload materials
     await loadLectureMaterials();
