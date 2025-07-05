@@ -78,12 +78,6 @@
             <div class="nav-brand">
               <h1 id="brand-logo" style="cursor: pointer;">الأكاديمية التعليمية</h1>
             </div>
-            <div class="nav-menu">
-              <a href="#" data-page="home" class="nav-link active">الرئيسية</a>
-              <a href="#" data-page="profile" class="nav-link">الملف الشخصي</a>
-              <a href="#" data-page="instructor" id="instructor-link" class="nav-link" style="display: none;">لوحة المدرب</a>
-              <a href="#" data-page="admin" id="admin-link" class="nav-link" style="display: none;">لوحة التحكم</a>
-            </div>
             <div class="nav-actions">
               <button id="theme-toggle" class="theme-btn">
                 <i class="fas fa-moon"></i>
@@ -529,52 +523,11 @@
                   <option value="audio">ملف صوتي</option>
                 </select>
               </div>
-              
-              <!-- خيارات رفع الفيديو -->
-              <div id="video-upload-options" class="form-group" style="display: none;">
-                <label>طريقة إضافة الفيديو</label>
-                <div class="upload-method-selector">
-                  <label class="radio-option">
-                    <input type="radio" name="video-method" value="url" checked>
-                    <span>رابط فيديو (يوتيوب أو رابط مباشر)</span>
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="video-method" value="upload">
-                    <span>رفع فيديو من الجهاز</span>
-                  </label>
-                </div>
-              </div>
-              
-              <!-- رفع الفيديو من الرابط -->
-              <div id="video-url-input" class="form-group">
+              <div class="form-group">
                 <label>رابط المادة</label>
-                <input type="url" id="material-url" placeholder="https://example.com/file.pdf أو https://youtube.com/watch?v=..." required>
+                <input type="url" id="material-url" placeholder="https://example.com/file.pdf" required>
                 <small>يمكنك إضافة رابط يوتيوب، رابط ملف PDF، أو أي رابط آخر</small>
               </div>
-              
-              <!-- رفع الفيديو من الجهاز -->
-              <div id="video-file-input" class="form-group" style="display: none;">
-                <label>رفع فيديو من الجهاز</label>
-                <div class="file-upload-area">
-                  <input type="file" id="material-file" accept="video/*" style="display: none;">
-                  <div class="file-upload-placeholder" onclick="document.getElementById('material-file').click()">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>اضغط لاختيار فيديو من جهازك</p>
-                    <small>الحد الأقصى: 500 ميجابايت</small>
-                  </div>
-                  <div id="file-upload-progress" class="upload-progress" style="display: none;">
-                    <div class="progress-bar">
-                      <div class="progress-fill"></div>
-                    </div>
-                    <span class="progress-text">جاري الرفع... 0%</span>
-                  </div>
-                  <div id="file-upload-success" class="upload-success" style="display: none;">
-                    <i class="fas fa-check-circle"></i>
-                    <span>تم رفع الفيديو بنجاح</span>
-                  </div>
-                </div>
-              </div>
-              
               <div class="form-group">
                 <label>مدة المادة (بالدقائق) - للفيديوهات والصوتيات فقط</label>
                 <input type="number" id="material-duration" min="0" value="0">
