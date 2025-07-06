@@ -767,3 +767,79 @@ export function getRoleDisplayName(role) {
   };
   return roles[role] || 'طالب';
 }
+// دالة رفع الملفات إلى Supabase Storage
+export async function uploadFile(file, folder = 'materials') {
+  try {
+    console.log('Starting file upload:', { name: file.name, size: file.size, type: file.type });
+    
+    // التحقق من حجم الملف (أقل من 100MB)
+    if (file.size > 100 * 1024 * 1024) {
+      throw new Error('حجم الملف يجب أن يكون أقل من 100 ميجابايت');
+    }
+    
+    const fileExt = file.name.split('.').pop().toLowerCase();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `${folder}/${fileName}`;
+
+    console.log('Uploading to path:', filePath);
+
+    // رفع الملف إلى التخزين
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('course-files')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw new Error(`خطأ في رفع الملف: ${uploadError.message}`);
+    }
+
+    console.log('Upload successful:', uploadData);
+
+    // الحصول على الرابط العام للملف
+    const { data: urlData } = supabase.storage
+      .from('course-files')
+      .getPublicUrl(filePath);
+
+    console.log('Public URL:', urlData.publicUrl);
+
+    return { data: urlData.publicUrl, error: null };
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    return { data: null, error };
+  }
+}
+
+// دالة للحصول على نوع الملف من extension
+export function getFileType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  
+  const videoTypes = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv'];
+  const documentTypes = ['pdf', 'doc', 'docx', 'txt', 'rtf'];
+  const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
+  const audioTypes = ['mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a'];
+  
+  if (videoTypes.includes(ext)) return 'video';
+  if (documentTypes.includes(ext)) return 'document';
+  if (imageTypes.includes(ext)) return 'image';
+  if (audioTypes.includes(ext)) return 'audio';
+  
+  return 'document'; // افتراضي
+}
+
+// دالة للتحقق من صحة نوع الملف
+export function validateFileType(file, allowedTypes = []) {
+  const fileType = getFileType(file.name);
+  
+  if (allowedTypes.length > 0 && !allowedTypes.includes(fileType)) {
+    return {
+      isValid: false,
+      error: `نوع الملف غير مدعوم. الأنواع المسموحة: ${allowedTypes.join(', ')}`
+    };
+  }
+  
+  return { isValid: true, error: null };
+}
+
