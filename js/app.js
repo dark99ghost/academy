@@ -30,6 +30,7 @@ import {
   isAdmin,
   hasAdminOrInstructorRole,
   uploadAvatar,
+  uploadVideo,
   checkUserCourseAccess,
   getYouTubeEmbedUrl,
   getRoleDisplayName
@@ -135,13 +136,13 @@ async function updateRoleVisibility() {
   const hasInstructorRole = await hasAdminOrInstructorRole(currentUser.id);
   
   // Show/hide admin links
-  const adminLinks = document.querySelectorAll('#admin-dropdown-link');
+  const adminLinks = document.querySelectorAll('#admin-link, #admin-dropdown-link');
   adminLinks.forEach(link => {
     link.style.display = isUserAdmin ? 'block' : 'none';
   });
   
   // Show/hide instructor links
-  const instructorLinks = document.querySelectorAll('#instructor-dropdown-link');
+  const instructorLinks = document.querySelectorAll('#instructor-link, #instructor-dropdown-link');
   instructorLinks.forEach(link => {
     link.style.display = (hasInstructorRole && !isUserAdmin) ? 'block' : 'none';
   });
@@ -149,9 +150,8 @@ async function updateRoleVisibility() {
 
 // Navigation
 function updateNavigation() {
-  // Handle dropdown navigation links
-  const dropdownLinks = document.querySelectorAll('.dropdown-menu a[data-page]');
-  dropdownLinks.forEach(link => {
+  const navLinks = document.querySelectorAll('.nav-link');
+  navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const page = link.getAttribute('data-page');
@@ -175,6 +175,15 @@ function showPage(pageId) {
   if (targetPage) {
     targetPage.classList.add('active');
   }
+  
+  // Update navigation active state
+  const navLinks = document.querySelectorAll('.nav-link');
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('data-page') === pageId) {
+      link.classList.add('active');
+    }
+  });
   
   // Load page-specific data
   switch (pageId) {
@@ -318,6 +327,165 @@ function setupEventListeners() {
       handleUserSearch();
     }
   });
+
+  // إعداد event listeners لرفع الفيديو
+  setupVideoUploadListeners();
+}
+
+// إعداد event listeners لرفع الفيديو
+function setupVideoUploadListeners() {
+  // تغيير نوع المادة
+  const materialTypeSelect = document.getElementById('material-type');
+  if (materialTypeSelect) {
+    materialTypeSelect.addEventListener('change', handleMaterialTypeChange);
+  }
+
+  // تغيير طريقة رفع الفيديو
+  const videoMethodRadios = document.querySelectorAll('input[name="video-method"]');
+  videoMethodRadios.forEach(radio => {
+    radio.addEventListener('change', handleVideoMethodChange);
+  });
+
+  // رفع الفيديو من الجهاز
+  const materialFileInput = document.getElementById('material-file');
+  if (materialFileInput) {
+    materialFileInput.addEventListener('change', handleVideoFileUpload);
+  }
+}
+
+// التعامل مع تغيير نوع المادة
+function handleMaterialTypeChange(e) {
+  const materialType = e.target.value;
+  const videoUploadOptions = document.getElementById('video-upload-options');
+  const videoUrlInput = document.getElementById('video-url-input');
+  const videoFileInput = document.getElementById('video-file-input');
+
+  if (materialType === 'video') {
+    videoUploadOptions.style.display = 'block';
+    // إظهار الخيار المناسب حسب الاختيار الحالي
+    const selectedMethod = document.querySelector('input[name="video-method"]:checked').value;
+    if (selectedMethod === 'url') {
+      videoUrlInput.style.display = 'block';
+      videoFileInput.style.display = 'none';
+    } else {
+      videoUrlInput.style.display = 'none';
+      videoFileInput.style.display = 'block';
+    }
+  } else {
+    videoUploadOptions.style.display = 'none';
+    videoUrlInput.style.display = 'block';
+    videoFileInput.style.display = 'none';
+    // تغيير placeholder حسب نوع المادة
+    const urlInput = document.getElementById('material-url');
+    switch (materialType) {
+      case 'pdf':
+        urlInput.placeholder = 'https://example.com/file.pdf';
+        break;
+      case 'document':
+        urlInput.placeholder = 'https://example.com/document.docx';
+        break;
+      case 'image':
+        urlInput.placeholder = 'https://example.com/image.jpg';
+        break;
+      case 'audio':
+        urlInput.placeholder = 'https://example.com/audio.mp3';
+        break;
+      default:
+        urlInput.placeholder = 'https://example.com/file';
+    }
+  }
+}
+
+// التعامل مع تغيير طريقة رفع الفيديو
+function handleVideoMethodChange(e) {
+  const method = e.target.value;
+  const videoUrlInput = document.getElementById('video-url-input');
+  const videoFileInput = document.getElementById('video-file-input');
+
+  if (method === 'url') {
+    videoUrlInput.style.display = 'block';
+    videoFileInput.style.display = 'none';
+    // إخفاء رسائل الرفع
+    hideUploadMessages();
+  } else {
+    videoUrlInput.style.display = 'none';
+    videoFileInput.style.display = 'block';
+    // إخفاء رسائل الرفع
+    hideUploadMessages();
+  }
+}
+
+// إخفاء رسائل الرفع
+function hideUploadMessages() {
+  const progressDiv = document.getElementById('file-upload-progress');
+  const successDiv = document.getElementById('file-upload-success');
+  
+  if (progressDiv) progressDiv.style.display = 'none';
+  if (successDiv) successDiv.style.display = 'none';
+}
+
+// التعامل مع رفع الفيديو من الجهاز
+async function handleVideoFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  console.log('Starting video file upload:', file.name);
+
+  const progressDiv = document.getElementById('file-upload-progress');
+  const successDiv = document.getElementById('file-upload-success');
+  const progressFill = document.querySelector('.progress-fill');
+  const progressText = document.querySelector('.progress-text');
+
+  try {
+    // إظهار شريط التقدم
+    progressDiv.style.display = 'block';
+    successDiv.style.display = 'none';
+    progressFill.style.width = '0%';
+    progressText.textContent = 'جاري الرفع... 0%';
+
+    // محاكاة تقدم الرفع
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress > 90) progress = 90;
+      progressFill.style.width = progress + '%';
+      progressText.textContent = `جاري الرفع... ${Math.round(progress)}%`;
+    }, 200);
+
+    // رفع الفيديو
+    const { data: videoUrl, error } = await uploadVideo(currentUser.id, file);
+
+    // إيقاف محاكاة التقدم
+    clearInterval(progressInterval);
+
+    if (error) {
+      throw error;
+    }
+
+    // إكمال شريط التقدم
+    progressFill.style.width = '100%';
+    progressText.textContent = 'تم الرفع بنجاح! 100%';
+
+    // إخفاء شريط التقدم وإظهار رسالة النجاح
+    setTimeout(() => {
+      progressDiv.style.display = 'none';
+      successDiv.style.display = 'block';
+      
+      // تحديث حقل الرابط
+      document.getElementById('material-url').value = videoUrl;
+      
+      console.log('Video uploaded successfully:', videoUrl);
+    }, 1000);
+
+  } catch (error) {
+    console.error('Error uploading video:', error);
+    
+    // إخفاء شريط التقدم
+    progressDiv.style.display = 'none';
+    
+    // إظهار رسالة خطأ
+    alert('خطأ في رفع الفيديو: ' + error.message);
+  }
 }
 
 // Authentication handlers
@@ -1332,9 +1500,31 @@ async function handleCreateMaterial(e) {
   
   const title = document.getElementById('material-title').value;
   const type = document.getElementById('material-type').value;
-  const url = document.getElementById('material-url').value;
   const duration = parseInt(document.getElementById('material-duration').value) || 0;
   const orderIndex = parseInt(document.getElementById('material-order').value) || 0;
+  
+  // الحصول على الرابط حسب طريقة الرفع
+  let url = '';
+  if (type === 'video') {
+    const selectedMethod = document.querySelector('input[name="video-method"]:checked').value;
+    if (selectedMethod === 'url') {
+      url = document.getElementById('material-url').value;
+    } else {
+      // التأكد من أن الفيديو تم رفعه
+      url = document.getElementById('material-url').value;
+      if (!url) {
+        alert('يرجى رفع الفيديو أولاً أو إدخال رابط');
+        return;
+      }
+    }
+  } else {
+    url = document.getElementById('material-url').value;
+  }
+  
+  if (!url) {
+    alert('يرجى إدخال رابط المادة');
+    return;
+  }
   
   try {
     const { data, error } = await createLectureMaterial({
@@ -1355,6 +1545,11 @@ async function handleCreateMaterial(e) {
     
     // Reset form
     document.getElementById('createMaterialForm').reset();
+    // إخفاء خيارات رفع الفيديو
+    document.getElementById('video-upload-options').style.display = 'none';
+    document.getElementById('video-url-input').style.display = 'block';
+    document.getElementById('video-file-input').style.display = 'none';
+    hideUploadMessages();
     
     // Reload materials
     await loadLectureMaterials();
@@ -1628,6 +1823,11 @@ function showModal(modalId) {
     if (modal) {
       modalOverlay.classList.add('active');
       modal.style.display = 'block';
+      
+      // إعداد event listeners للفيديو إذا كانت النافذة لإضافة المواد
+      if (modalId === 'create-material-modal') {
+        setupVideoUploadListeners();
+      }
     }
   }, 50);
 }
