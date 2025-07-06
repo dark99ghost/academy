@@ -767,6 +767,8 @@ export function getRoleDisplayName(role) {
   };
   return roles[role] || 'طالب';
 }
+
+// File Upload Functions
 // دالة رفع الملفات إلى Supabase Storage
 export async function uploadFile(file, folder = 'materials') {
   try {
@@ -842,4 +844,3 @@ export function validateFileType(file, allowedTypes = []) {
   
   return { isValid: true, error: null };
 }
-
