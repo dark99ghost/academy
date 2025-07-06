@@ -46,11 +46,7 @@ let currentLecture = null;
 let currentCourseId = null;
 let currentLectureId = null;
 let currentMaterial = null;
-let modalEventListenersAdded = false; // منع تكرار إضافة event listeners
-
-// متغيرات جديدة لرفع الملفات
-let selectedFile = null;
-let isFileUploaded = false;
+let modalEventListenersAdded = false;
 
 // DOM Elements
 const loadingContainer = document.getElementById('loading');
@@ -64,7 +60,6 @@ const modalOverlay = document.getElementById('modal-overlay');
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('App initializing...');
   
-  // Check if user is already logged in
   currentUser = await getCurrentUser();
   
   if (currentUser) {
@@ -100,7 +95,6 @@ async function showMainApp() {
   authContainer.style.display = 'none';
   mainContainer.style.display = 'block';
   
-  // Load initial data
   await loadCourses();
   await updateNavigation();
   showPage('home');
@@ -119,7 +113,6 @@ async function loadUserProfile() {
   currentUserProfile = data;
   console.log('User profile loaded:', currentUserProfile);
   
-  // Update UI with user info
   updateUserAvatar();
   updateRoleVisibility();
 }
@@ -141,13 +134,11 @@ async function updateRoleVisibility() {
   const isUserAdmin = await isAdmin(currentUser.id);
   const hasInstructorRole = await hasAdminOrInstructorRole(currentUser.id);
   
-  // Show/hide admin links
   const adminLinks = document.querySelectorAll('#admin-dropdown-link');
   adminLinks.forEach(link => {
     link.style.display = isUserAdmin ? 'block' : 'none';
   });
   
-  // Show/hide instructor links
   const instructorLinks = document.querySelectorAll('#instructor-dropdown-link');
   instructorLinks.forEach(link => {
     link.style.display = (hasInstructorRole && !isUserAdmin) ? 'block' : 'none';
@@ -156,7 +147,6 @@ async function updateRoleVisibility() {
 
 // Navigation
 function updateNavigation() {
-  // Handle dropdown navigation links
   const dropdownLinks = document.querySelectorAll('.dropdown-menu a[data-page]');
   dropdownLinks.forEach(link => {
     link.addEventListener('click', (e) => {
@@ -166,24 +156,20 @@ function updateNavigation() {
     });
   });
   
-  // Brand logo click
   document.getElementById('brand-logo').addEventListener('click', () => {
     showPage('home');
   });
 }
 
 function showPage(pageId) {
-  // Hide all pages
   const pages = document.querySelectorAll('.page');
   pages.forEach(page => page.classList.remove('active'));
   
-  // Show selected page
   const targetPage = document.getElementById(`${pageId}-page`);
   if (targetPage) {
     targetPage.classList.add('active');
   }
   
-  // Load page-specific data
   switch (pageId) {
     case 'home':
       loadCourses();
@@ -201,7 +187,6 @@ function showPage(pageId) {
   }
 }
 
-// إعداد تبويبات لوحة التحكم
 function setupAdminTabs() {
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.admin-tab-content');
@@ -210,18 +195,15 @@ function setupAdminTabs() {
     button.addEventListener('click', () => {
       const targetTab = button.getAttribute('data-tab');
       
-      // إزالة الفئة النشطة من جميع الأزرار والمحتويات
       tabButtons.forEach(btn => btn.classList.remove('active'));
       tabContents.forEach(content => content.classList.remove('active'));
       
-      // إضافة الفئة النشطة للزر والمحتوى المحدد
       button.classList.add('active');
       const targetContent = document.getElementById(`admin-${targetTab}`);
       if (targetContent) {
         targetContent.classList.add('active');
       }
       
-      // تحميل البيانات حسب التبويب
       switch (targetTab) {
         case 'courses':
           loadAdminCourses();
@@ -272,7 +254,7 @@ function setupEventListeners() {
   // Theme toggle
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   
-  // Modal close - إضافة فقط مرة واحدة
+  // Modal close
   if (!modalEventListenersAdded) {
     document.querySelectorAll('.modal-close').forEach(btn => {
       btn.addEventListener('click', closeModal);
@@ -319,31 +301,178 @@ function setupEventListeners() {
   document.getElementById('search-users-btn').addEventListener('click', handleUserSearch);
   document.getElementById('clear-search-btn').addEventListener('click', handleClearSearch);
   
-  // Enter key for search
   document.getElementById('user-search').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       handleUserSearch();
     }
   });
 
-  // File upload listeners
-  document.getElementById('file-upload-area').addEventListener('click', () => {
-    document.getElementById('material-file').click();
-  });
-  
-  document.getElementById('material-file').addEventListener('change', handleFileSelect);
-  document.getElementById('remove-file-btn').addEventListener('click', removeSelectedFile);
-  
+  // File upload functionality
+  setupFileUploadListeners();
+}
+
+// File Upload Event Listeners
+function setupFileUploadListeners() {
   // Material source radio buttons
-  document.querySelectorAll('input[name="material-source"]').forEach(radio => {
-    radio.addEventListener('change', toggleMaterialSource);
+  const materialSourceRadios = document.querySelectorAll('input[name="material-source"]');
+  const fileUploadSection = document.getElementById('file-upload-section');
+  const linkInputSection = document.getElementById('link-input-section');
+  
+  materialSourceRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.value === 'upload') {
+        fileUploadSection.style.display = 'block';
+        linkInputSection.style.display = 'none';
+        document.getElementById('material-url').removeAttribute('required');
+      } else {
+        fileUploadSection.style.display = 'none';
+        linkInputSection.style.display = 'block';
+        document.getElementById('material-url').setAttribute('required', '');
+      }
+    });
   });
   
-  // Drag and drop للملفات
-  const uploadArea = document.getElementById('file-upload-area');
-  uploadArea.addEventListener('dragover', handleDragOver);
-  uploadArea.addEventListener('dragleave', handleDragLeave);
-  uploadArea.addEventListener('drop', handleFileDrop);
+  // File upload area
+  const fileUploadArea = document.getElementById('file-upload-area');
+  const materialFileInput = document.getElementById('material-file');
+  
+  if (fileUploadArea && materialFileInput) {
+    fileUploadArea.addEventListener('click', () => {
+      materialFileInput.click();
+    });
+    
+    fileUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.add('drag-over');
+    });
+    
+    fileUploadArea.addEventListener('dragleave', () => {
+      fileUploadArea.classList.remove('drag-over');
+    });
+    
+    fileUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('drag-over');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFileSelection(files[0]);
+      }
+    });
+    
+    materialFileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFileSelection(e.target.files[0]);
+      }
+    });
+  }
+  
+  // Remove file button
+  const removeFileBtn = document.getElementById('remove-file-btn');
+  if (removeFileBtn) {
+    removeFileBtn.addEventListener('click', () => {
+      clearFileSelection();
+    });
+  }
+}
+
+// File handling functions
+async function handleFileSelection(file) {
+  const materialType = document.getElementById('material-type').value;
+  
+  // Validate file type
+  const validation = validateFileType(file, materialType ? [materialType] : []);
+  if (!validation.isValid) {
+    alert(validation.error);
+    return;
+  }
+  
+  // Show upload progress
+  showUploadProgress();
+  
+  try {
+    // Upload file
+    const { data: fileUrl, error } = await uploadFile(file, 'materials');
+    
+    if (error) {
+      throw error;
+    }
+    
+    // Update UI
+    showUploadSuccess(file.name, fileUrl);
+    
+    // Auto-detect material type if not selected
+    if (!materialType) {
+      const detectedType = getFileType(file.name);
+      document.getElementById('material-type').value = detectedType;
+    }
+    
+  } catch (error) {
+    console.error('File upload error:', error);
+    alert('خطأ في رفع الملف: ' + error.message);
+    hideUploadProgress();
+  }
+}
+
+function showUploadProgress() {
+  const uploadProgress = document.getElementById('upload-progress');
+  const uploadedFileInfo = document.getElementById('uploaded-file-info');
+  
+  uploadProgress.style.display = 'block';
+  uploadedFileInfo.style.display = 'none';
+  
+  // Simulate progress
+  const progressFill = document.querySelector('.progress-fill');
+  const progressText = document.querySelector('.progress-text');
+  
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress > 90) progress = 90;
+    
+    progressFill.style.width = progress + '%';
+    progressText.textContent = Math.round(progress) + '%';
+    
+    if (progress >= 90) {
+      clearInterval(interval);
+    }
+  }, 200);
+}
+
+function showUploadSuccess(fileName, fileUrl) {
+  const uploadProgress = document.getElementById('upload-progress');
+  const uploadedFileInfo = document.getElementById('uploaded-file-info');
+  const uploadedFileName = document.getElementById('uploaded-file-name');
+  
+  // Complete progress
+  const progressFill = document.querySelector('.progress-fill');
+  const progressText = document.querySelector('.progress-text');
+  progressFill.style.width = '100%';
+  progressText.textContent = '100%';
+  
+  setTimeout(() => {
+    uploadProgress.style.display = 'none';
+    uploadedFileInfo.style.display = 'flex';
+    uploadedFileName.textContent = fileName;
+    
+    // Set the URL in the hidden field or form
+    document.getElementById('material-url').value = fileUrl;
+  }, 500);
+}
+
+function hideUploadProgress() {
+  const uploadProgress = document.getElementById('upload-progress');
+  uploadProgress.style.display = 'none';
+}
+
+function clearFileSelection() {
+  const materialFileInput = document.getElementById('material-file');
+  const uploadedFileInfo = document.getElementById('uploaded-file-info');
+  const uploadProgress = document.getElementById('upload-progress');
+  
+  materialFileInput.value = '';
+  uploadedFileInfo.style.display = 'none';
+  uploadProgress.style.display = 'none';
+  document.getElementById('material-url').value = '';
 }
 
 // Authentication handlers
@@ -391,7 +520,6 @@ async function handleRegister(e) {
   
   alert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
   
-  // Switch to login form
   registerForm.style.display = 'none';
   loginForm.style.display = 'block';
   
@@ -418,14 +546,12 @@ async function handleLogout() {
 async function loadProfileData() {
   if (!currentUser || !currentUserProfile) return;
   
-  // Populate profile form
   document.getElementById('profile-user-id').value = currentUserProfile.user_id || '';
   document.getElementById('profile-name').value = currentUserProfile.full_name || '';
   document.getElementById('profile-email').value = currentUser.email || '';
   document.getElementById('profile-level').value = currentUserProfile.education_level || '';
   document.getElementById('profile-role').value = getRoleDisplayName(currentUserProfile.role) || 'طالب';
   
-  // Update avatar
   if (currentUserProfile.avatar_url) {
     document.getElementById('profile-avatar').src = currentUserProfile.avatar_url;
   }
@@ -439,7 +565,6 @@ async function handleProfileUpdate(e) {
   const password = document.getElementById('profile-password').value;
   
   try {
-    // Update profile
     const updates = {
       full_name: name,
       education_level: level
@@ -451,7 +576,6 @@ async function handleProfileUpdate(e) {
       throw profileError;
     }
     
-    // Update password if provided
     if (password) {
       const { error: passwordError } = await updatePassword(password);
       if (passwordError) {
@@ -459,12 +583,10 @@ async function handleProfileUpdate(e) {
       }
     }
     
-    // Reload profile
     await loadUserProfile();
     
     alert('تم تحديث الملف الشخصي بنجاح!');
     
-    // Clear password field
     document.getElementById('profile-password').value = '';
     
   } catch (error) {
@@ -484,7 +606,6 @@ async function handleAvatarUpload(e) {
       throw error;
     }
     
-    // Update profile with new avatar URL
     const { error: updateError } = await updateUserProfile(currentUser.id, {
       avatar_url: avatarUrl
     });
@@ -493,7 +614,6 @@ async function handleAvatarUpload(e) {
       throw updateError;
     }
     
-    // Update UI
     currentUserProfile.avatar_url = avatarUrl;
     updateUserAvatar();
     
@@ -530,7 +650,7 @@ async function displayCourses(courses) {
     return;
   }
   
-  // التحقق من اشتراكات المستخدم لكل كورس
+  // Check user access for each course
   const coursesWithAccess = await Promise.all(
     courses.map(async (course) => {
       if (!currentUser) {
@@ -542,24 +662,86 @@ async function displayCourses(courses) {
     })
   );
   
-  coursesGrid.innerHTML = coursesWithAccess.map(course => `
-    <div class="course-card">
-      <img src="${course.image_url || 'https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg'}" 
-           alt="${course.title}" class="course-image">
-      <div class="course-content">
-        <h3 class="course-title">${course.title}</h3>
-        <p class="course-description">${course.description}</p>
-        <div class="course-price">${course.price} ج.م</div>
-        <div class="course-actions">
-          <button class="btn-primary" onclick="showCoursePreview('${course.id}')">معاينة</button>
-          ${course.hasAccess 
-            ? `<button class="btn-success" onclick="showCourseContent('${course.id}')">دخول الكورس</button>`
-            : `<button class="btn-secondary" onclick="subscribeToCourse('${course.id}')">اشتراك</button>`
-          }
+  coursesGrid.innerHTML = coursesWithAccess.map(course => {
+    const isFree = course.price === 0;
+    const priceDisplay = isFree ? 'مجاني' : `${course.price} ج.م`;
+    
+    return `
+      <div class="course-card">
+        <img src="${course.image_url || 'https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg'}" 
+             alt="${course.title}" class="course-image">
+        <div class="course-content">
+          <h3 class="course-title">${course.title}</h3>
+          <p class="course-description">${course.description}</p>
+          <div class="course-price">${priceDisplay}</div>
+          <div class="course-actions">
+            <button class="btn-primary" onclick="showCoursePreview('${course.id}')">معاينة</button>
+            ${course.hasAccess 
+              ? `<button class="btn-success" onclick="showCourseContent('${course.id}')">دخول الكورس</button>`
+              : isFree 
+                ? `<button class="btn-success" onclick="enrollInFreeCourse('${course.id}')">التحاق مجاني</button>`
+                : `<button class="btn-secondary" onclick="subscribeToCourse('${course.id}')">اشتراك</button>`
+            }
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+}
+
+// Free course enrollment
+async function enrollInFreeCourse(courseId) {
+  if (!currentUser) {
+    alert('يجب تسجيل الدخول أولاً');
+    return;
+  }
+  
+  try {
+    // Check if course is actually free
+    const { data: course, error: courseError } = await getCourse(courseId);
+    
+    if (courseError) {
+      throw courseError;
+    }
+    
+    if (course.price !== 0) {
+      alert('هذا الكورس ليس مجانياً');
+      return;
+    }
+    
+    // Create free access (expires in 1 year)
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    
+    const { data: access, error: accessError } = await supabase
+      .from('user_course_access')
+      .upsert({
+        user_id: currentUser.id,
+        course_id: courseId,
+        expires_at: expiresAt.toISOString(),
+        is_active: true
+      }, {
+        onConflict: 'user_id,course_id'
+      })
+      .select()
+      .single();
+    
+    if (accessError) {
+      throw accessError;
+    }
+    
+    alert('تم التحاقك بالكورس المجاني بنجاح!');
+    
+    // Reload courses to update UI
+    await loadCourses();
+    
+    // Show course content
+    showCourseContent(courseId);
+    
+  } catch (error) {
+    console.error('Free enrollment error:', error);
+    alert('خطأ في الالتحاق بالكورس: ' + error.message);
+  }
 }
 
 async function showCoursePreview(courseId) {
@@ -603,13 +785,16 @@ function displayCoursePreview(course) {
       `).join('')
     : '<p>لا توجد محاضرات متاحة</p>';
   
+  const isFree = course.price === 0;
+  const priceDisplay = isFree ? 'مجاني' : `${course.price} ج.م`;
+  
   previewContent.innerHTML = `
     <img src="${course.image_url || 'https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg'}" 
          alt="${course.title}" class="course-preview-image">
     <div class="course-info">
       <h4>وصف الكورس</h4>
       <p>${course.description}</p>
-      <p><strong>السعر:</strong> ${course.price} ج.م</p>
+      <p><strong>السعر:</strong> ${priceDisplay}</p>
     </div>
     <div class="course-lectures">
       <h5>المحاضرات</h5>
@@ -619,18 +804,16 @@ function displayCoursePreview(course) {
 }
 
 async function subscribeToCourse(courseId) {
-  // التحقق أولاً من وجود اشتراك سابق
+  // Check for existing access first
   const { data: existingAccess } = await checkUserCourseAccess(currentUser.id, courseId);
   
   if (existingAccess) {
-    // المستخدم مشترك بالفعل، انتقل مباشرة للكورس
     showCourseContent(courseId);
     return;
   }
   
   currentCourseId = courseId;
   
-  // Get course details for modal
   try {
     const { data: course, error } = await getCourse(courseId);
     
@@ -638,10 +821,13 @@ async function subscribeToCourse(courseId) {
       throw error;
     }
     
+    const isFree = course.price === 0;
+    const priceDisplay = isFree ? 'مجاني' : `${course.price} ج.م`;
+    
     document.getElementById('course-details').innerHTML = `
       <h4>${course.title}</h4>
       <p>${course.description}</p>
-      <p><strong>السعر:</strong> ${course.price} ج.م</p>
+      <p><strong>السعر:</strong> ${priceDisplay}</p>
     `;
     
     showModal('subscription-modal');
@@ -663,14 +849,12 @@ async function handleCourseSubscription(e) {
   }
   
   try {
-    // Validate subscription code
     const { data: validCode, error: validationError } = await validateSubscriptionCode(code, currentCourseId);
     
     if (validationError) {
       throw validationError;
     }
     
-    // Use subscription code
     const { data: access, error: useError } = await useSubscriptionCode(validCode.id, currentUser.id, currentCourseId);
     
     if (useError) {
@@ -680,13 +864,10 @@ async function handleCourseSubscription(e) {
     alert('تم الاشتراك في الكورس بنجاح!');
     closeModal();
     
-    // Clear form
     document.getElementById('subscription-code').value = '';
     
-    // إعادة تحميل الكورسات لتحديث حالة الاشتراك
     await loadCourses();
     
-    // Show course content
     showCourseContent(currentCourseId);
     
   } catch (error) {
@@ -697,7 +878,6 @@ async function handleCourseSubscription(e) {
 
 async function showCourseContent(courseId) {
   try {
-    // Check if user has access
     const { data: access, error: accessError } = await checkUserCourseAccess(currentUser.id, courseId);
     
     if (accessError || !access) {
@@ -705,7 +885,6 @@ async function showCourseContent(courseId) {
       return;
     }
     
-    // Load course with lectures
     const { data: course, error } = await getCourse(courseId);
     
     if (error) {
@@ -732,12 +911,10 @@ function displayCourseContent(course) {
     return;
   }
   
-  // Sort lectures by order
   const sortedLectures = course.lectures.sort((a, b) => a.order_index - b.order_index);
   
   wrapper.innerHTML = `
     <div class="course-layout">
-      <!-- منطقة عرض المحتوى الرئيسي -->
       <div class="main-content-area">
         <div id="material-viewer">
           <div class="welcome-message">
@@ -747,7 +924,6 @@ function displayCourseContent(course) {
         </div>
       </div>
       
-      <!-- الشريط الجانبي للمحاضرات -->
       <div class="course-sidebar">
         <h4>المحاضرات</h4>
         <div class="lectures-list">
@@ -762,7 +938,6 @@ function displayCourseContent(course) {
         </div>
       </div>
       
-      <!-- منطقة المواد في الأسفل -->
       <div class="materials-bottom-panel">
         <div class="materials-header">
           <h5 id="current-lecture-title">اختر محاضرة لعرض موادها</h5>
@@ -774,16 +949,13 @@ function displayCourseContent(course) {
     </div>
   `;
   
-  // Load first lecture by default
   if (sortedLectures.length > 0) {
     selectLecture(sortedLectures[0].id);
   }
 }
 
-// دالة محسنة لاختيار المحاضرة وعرض موادها
 async function selectLecture(lectureId, clickedElement = null) {
   try {
-    // Find lecture in current course
     const lecture = currentCourse.lectures.find(l => l.id === lectureId);
     
     if (!lecture) {
@@ -792,29 +964,23 @@ async function selectLecture(lectureId, clickedElement = null) {
     
     currentLecture = lecture;
     
-    // Update sidebar active state
     document.querySelectorAll('.lecture-sidebar-item').forEach(item => {
       item.classList.remove('active');
     });
     
-    // إضافة الفئة النشطة للعنصر المحدد
     if (clickedElement) {
       clickedElement.classList.add('active');
     } else {
-      // إذا لم يتم تمرير العنصر، ابحث عنه باستخدام lectureId
       const targetElement = document.querySelector(`[onclick*="${lectureId}"]`);
       if (targetElement) {
         targetElement.classList.add('active');
       }
     }
     
-    // Update lecture title in materials panel
     document.getElementById('current-lecture-title').textContent = lecture.title;
     
-    // Display materials in bottom panel
     displayLectureMaterials(lecture);
     
-    // Clear main content area
     document.getElementById('material-viewer').innerHTML = `
       <div class="lecture-info">
         <h3>${lecture.title}</h3>
@@ -829,11 +995,9 @@ async function selectLecture(lectureId, clickedElement = null) {
   }
 }
 
-// دالة لعرض مواد المحاضرة في الأسفل
 function displayLectureMaterials(lecture) {
   const materialsGrid = document.getElementById('materials-grid');
   
-  // Sort materials by order
   const sortedMaterials = lecture.lecture_materials 
     ? lecture.lecture_materials.sort((a, b) => a.order_index - b.order_index)
     : [];
@@ -857,7 +1021,6 @@ function displayLectureMaterials(lecture) {
   `).join('');
 }
 
-// دالة لاختيار وعرض المادة في المنطقة الرئيسية
 function selectMaterial(materialId) {
   const material = currentLecture.lecture_materials.find(m => m.id === materialId);
   
@@ -868,18 +1031,15 @@ function selectMaterial(materialId) {
   
   currentMaterial = material;
   
-  // Update active state in materials grid
   document.querySelectorAll('.material-card').forEach(card => {
     card.classList.remove('active');
   });
   
   event.target.closest('.material-card').classList.add('active');
   
-  // Display material in main viewer
   displayMaterialInViewer(material);
 }
 
-// دالة لعرض المادة في المنطقة الرئيسية
 function displayMaterialInViewer(material) {
   const materialViewer = document.getElementById('material-viewer');
   
@@ -958,7 +1118,6 @@ async function loadInstructorData() {
     return;
   }
   
-  // Load instructor courses
   loadInstructorCourses();
 }
 
@@ -986,20 +1145,25 @@ function displayInstructorCourses(courses) {
     return;
   }
   
-  coursesList.innerHTML = courses.map(course => `
-    <div class="admin-item">
-      <div class="admin-item-info">
-        <h4>${course.title}</h4>
-        <p>${course.description}</p>
-        <p><strong>السعر:</strong> ${course.price} ج.م</p>
-        <p><strong>الفئة المستهدفة:</strong> ${course.target_level || 'الكل'}</p>
+  coursesList.innerHTML = courses.map(course => {
+    const isFree = course.price === 0;
+    const priceDisplay = isFree ? 'مجاني' : `${course.price} ج.م`;
+    
+    return `
+      <div class="admin-item">
+        <div class="admin-item-info">
+          <h4>${course.title}</h4>
+          <p>${course.description}</p>
+          <p><strong>السعر:</strong> ${priceDisplay}</p>
+          <p><strong>الفئة المستهدفة:</strong> ${course.target_level || 'الكل'}</p>
+        </div>
+        <div class="admin-item-actions">
+          <button class="btn-secondary" onclick="manageLectures('${course.id}')">إدارة المحاضرات</button>
+          <button class="btn-danger" onclick="deleteCourseAdmin('${course.id}')">حذف</button>
+        </div>
       </div>
-      <div class="admin-item-actions">
-        <button class="btn-secondary" onclick="manageLectures('${course.id}')">إدارة المحاضرات</button>
-        <button class="btn-danger" onclick="deleteCourseAdmin('${course.id}')">حذف</button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // Admin functions
@@ -1012,7 +1176,6 @@ async function loadAdminData() {
     return;
   }
   
-  // Load admin data for the default tab (courses)
   loadAdminCourses();
 }
 
@@ -1040,20 +1203,25 @@ function displayAdminCourses(courses) {
     return;
   }
   
-  coursesList.innerHTML = courses.map(course => `
-    <div class="admin-item">
-      <div class="admin-item-info">
-        <h4>${course.title}</h4>
-        <p>${course.description}</p>
-        <p><strong>السعر:</strong> ${course.price} ج.م</p>
-        <p><strong>الفئة المستهدفة:</strong> ${course.target_level || 'الكل'}</p>
+  coursesList.innerHTML = courses.map(course => {
+    const isFree = course.price === 0;
+    const priceDisplay = isFree ? 'مجاني' : `${course.price} ج.م`;
+    
+    return `
+      <div class="admin-item">
+        <div class="admin-item-info">
+          <h4>${course.title}</h4>
+          <p>${course.description}</p>
+          <p><strong>السعر:</strong> ${priceDisplay}</p>
+          <p><strong>الفئة المستهدفة:</strong> ${course.target_level || 'الكل'}</p>
+        </div>
+        <div class="admin-item-actions">
+          <button class="btn-secondary" onclick="manageLectures('${course.id}')">إدارة المحاضرات</button>
+          <button class="btn-danger" onclick="deleteCourseAdmin('${course.id}')">حذف</button>
+        </div>
       </div>
-      <div class="admin-item-actions">
-        <button class="btn-secondary" onclick="manageLectures('${course.id}')">إدارة المحاضرات</button>
-        <button class="btn-danger" onclick="deleteCourseAdmin('${course.id}')">حذف</button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 async function loadAdminUsers() {
@@ -1201,10 +1369,8 @@ async function handleCreateCourse(e) {
     alert('تم إنشاء الكورس بنجاح!');
     closeModal();
     
-    // Reset form
     document.getElementById('createCourseForm').reset();
     
-    // Reload courses based on current page
     const currentPage = document.querySelector('.page.active').id;
     if (currentPage === 'admin-page') {
       await loadAdminCourses();
@@ -1245,10 +1411,8 @@ async function handleCreateCode(e) {
     alert('تم إنشاء الكود بنجاح!');
     closeModal();
     
-    // Reset form
     document.getElementById('createCodeForm').reset();
     
-    // Reload codes
     await loadAdminCodes();
     
   } catch (error) {
@@ -1283,7 +1447,6 @@ async function handleEditCode(e) {
     alert('تم تحديث الكود بنجاح!');
     closeModal();
     
-    // Reload codes
     await loadAdminCodes();
     
   } catch (error) {
@@ -1308,7 +1471,6 @@ async function handleEditUserRole(e) {
     alert('تم تحديث دور المستخدم بنجاح!');
     closeModal();
     
-    // Reload users
     await loadAdminUsers();
     
   } catch (error) {
@@ -1341,10 +1503,8 @@ async function handleCreateLecture(e) {
     alert('تم إضافة المحاضرة بنجاح!');
     closeModal();
     
-    // Reset form
     document.getElementById('createLectureForm').reset();
     
-    // Reload lectures
     await loadCourseLectures();
     
   } catch (error) {
@@ -1358,45 +1518,32 @@ async function handleCreateMaterial(e) {
   
   const title = document.getElementById('material-title').value;
   const type = document.getElementById('material-type').value;
+  const materialSource = document.querySelector('input[name="material-source"]:checked').value;
   const duration = parseInt(document.getElementById('material-duration').value) || 0;
   const orderIndex = parseInt(document.getElementById('material-order').value) || 0;
-  const materialSource = document.querySelector('input[name="material-source"]:checked').value;
   
-  let materialUrl = '';
+  let url = '';
+  
+  if (materialSource === 'upload') {
+    url = document.getElementById('material-url').value;
+    if (!url) {
+      alert('يرجى رفع ملف أولاً');
+      return;
+    }
+  } else {
+    url = document.getElementById('material-url').value;
+    if (!url) {
+      alert('يرجى إدخال رابط المادة');
+      return;
+    }
+  }
   
   try {
-    if (materialSource === 'upload') {
-      // رفع ملف
-      if (!selectedFile) {
-        alert('يرجى اختيار ملف للرفع');
-        return;
-      }
-      
-      showUploadProgress();
-      
-      const { data: uploadedUrl, error: uploadError } = await uploadFile(selectedFile, 'materials');
-      
-      if (uploadError) {
-        throw uploadError;
-      }
-      
-      materialUrl = uploadedUrl;
-      isFileUploaded = true;
-      
-    } else {
-      // استخدام رابط
-      materialUrl = document.getElementById('material-url').value;
-      if (!materialUrl) {
-        alert('يرجى إدخال رابط المادة');
-        return;
-      }
-    }
-    
     const { data, error } = await createLectureMaterial({
       lecture_id: currentLectureId,
       title,
       type,
-      url: materialUrl,
+      url,
       duration,
       order_index: orderIndex
     });
@@ -1408,22 +1555,14 @@ async function handleCreateMaterial(e) {
     alert('تم إضافة المادة بنجاح!');
     closeModal();
     
-    // Reset form
     document.getElementById('createMaterialForm').reset();
-    removeSelectedFile();
+    clearFileSelection();
     
-    // إعادة تحديد الخيار الافتراضي
-    document.querySelector('input[name="material-source"][value="upload"]').checked = true;
-    toggleMaterialSource();
-    
-    // Reload materials
     await loadLectureMaterials();
     
   } catch (error) {
     console.error('Error creating material:', error);
     alert('خطأ في إضافة المادة: ' + error.message);
-  } finally {
-    hideUploadProgress();
   }
 }
 
@@ -1442,7 +1581,6 @@ async function deleteCourseAdmin(courseId) {
     
     alert('تم حذف الكورس بنجاح!');
     
-    // Reload courses based on current page
     const currentPage = document.querySelector('.page.active').id;
     if (currentPage === 'admin-page') {
       await loadAdminCourses();
@@ -1494,17 +1632,13 @@ function editUserRole(userId, userName, currentRole) {
   showModal('edit-user-role-modal');
 }
 
-// إصلاح دالة manageLectures لمنع تكرار النوافذ
 async function manageLectures(courseId) {
-  // التأكد من إغلاق أي نوافذ مفتوحة أولاً
   closeModal();
   
-  // انتظار قصير للتأكد من إغلاق النوافذ
   await new Promise(resolve => setTimeout(resolve, 100));
   
   currentCourseId = courseId;
   
-  // تحميل بيانات الكورس مع المحاضرات
   try {
     const { data: course, error } = await getCourse(courseId);
     
@@ -1515,7 +1649,6 @@ async function manageLectures(courseId) {
     currentCourse = course;
     displayLecturesList(course.lectures || []);
     
-    // عرض النافذة مرة واحدة فقط
     showModal('manage-lectures-modal');
     
   } catch (error) {
@@ -1567,17 +1700,13 @@ function displayLecturesList(lectures) {
   `).join('');
 }
 
-// إصلاح دالة manageMaterials لمنع تكرار النوافذ
 async function manageMaterials(lectureId) {
-  // التأكد من إغلاق أي نوافذ مفتوحة أولاً
   closeModal();
   
-  // انتظار قصير للتأكد من إغلاق النوافذ
   await new Promise(resolve => setTimeout(resolve, 100));
   
   currentLectureId = lectureId;
   
-  // العثور على المحاضرة في الكورس الحالي
   const lecture = currentCourse?.lectures?.find(l => l.id === lectureId);
   
   if (lecture) {
@@ -1586,13 +1715,11 @@ async function manageMaterials(lectureId) {
     document.getElementById('materials-list').innerHTML = '<p>لا توجد مواد</p>';
   }
   
-  // عرض النافذة مرة واحدة فقط
   showModal('manage-materials-modal');
 }
 
 async function loadLectureMaterials() {
   try {
-    // العثور على المحاضرة في الكورس الحالي
     const lecture = currentCourse?.lectures?.find(l => l.id === currentLectureId);
     
     if (!lecture) {
@@ -1666,7 +1793,6 @@ async function deleteMaterialAdmin(materialId) {
     
     alert('تم حذف المادة بنجاح!');
     
-    // إعادة تحميل بيانات الكورس لتحديث المواد
     const { data: course, error: courseError } = await getCourse(currentCourseId);
     if (!courseError) {
       currentCourse = course;
@@ -1679,12 +1805,10 @@ async function deleteMaterialAdmin(materialId) {
   }
 }
 
-// Modal functions - إصلاح لمنع تكرار النوافذ
+// Modal functions
 function showModal(modalId) {
-  // إغلاق جميع النوافذ أولاً
   closeModal();
   
-  // انتظار قصير ثم عرض النافذة المطلوبة
   setTimeout(() => {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -1707,106 +1831,6 @@ function showCreateLectureModal() {
 
 function showCreateMaterialModal() {
   showModal('create-material-modal');
-}
-
-// File Upload Functions
-// دالة التبديل بين رفع ملف أو إدخال رابط
-function toggleMaterialSource() {
-  const selectedSource = document.querySelector('input[name="material-source"]:checked').value;
-  const fileSection = document.getElementById('file-upload-section');
-  const linkSection = document.getElementById('link-input-section');
-  
-  if (selectedSource === 'upload') {
-    fileSection.style.display = 'block';
-    linkSection.style.display = 'none';
-    document.getElementById('material-url').removeAttribute('required');
-  } else {
-    fileSection.style.display = 'none';
-    linkSection.style.display = 'block';
-    document.getElementById('material-url').setAttribute('required', 'required');
-    // إزالة الملف المختار إذا كان موجود
-    removeSelectedFile();
-  }
-}
-
-// دالة اختيار الملف
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if (file) {
-    processSelectedFile(file);
-  }
-}
-
-// دالة معالجة الملف المختار
-function processSelectedFile(file) {
-  // التحقق من نوع الملف
-  const validation = validateFileType(file);
-  if (!validation.isValid) {
-    alert(validation.error);
-    return;
-  }
-  
-  selectedFile = file;
-  
-  // إخفاء منطقة الرفع وإظهار معلومات الملف
-  document.querySelector('.upload-placeholder').style.display = 'none';
-  document.getElementById('uploaded-file-info').style.display = 'flex';
-  document.getElementById('uploaded-file-name').textContent = file.name;
-  
-  // تحديد نوع المادة تلقائياً
-  const detectedType = getFileType(file.name);
-  const typeSelect = document.getElementById('material-type');
-  if (detectedType && typeSelect.querySelector(`option[value="${detectedType}"]`)) {
-    typeSelect.value = detectedType;
-  }
-}
-
-// دالة إزالة الملف المختار
-function removeSelectedFile() {
-  selectedFile = null;
-  isFileUploaded = false;
-  
-  document.getElementById('material-file').value = '';
-  document.querySelector('.upload-placeholder').style.display = 'block';
-  document.getElementById('uploaded-file-info').style.display = 'none';
-  document.getElementById('upload-progress').style.display = 'none';
-}
-
-// دوال Drag and Drop
-function handleDragOver(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-}
-
-function handleDragLeave(e) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-}
-
-function handleFileDrop(e) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  
-  const files = e.dataTransfer.files;
-  if (files.length > 0) {
-    processSelectedFile(files[0]);
-  }
-}
-
-// دالة إظهار تقدم الرفع
-function showUploadProgress() {
-  document.getElementById('upload-progress').style.display = 'block';
-  const createBtn = document.getElementById('create-material-btn');
-  createBtn.disabled = true;
-  createBtn.textContent = 'جاري الرفع...';
-}
-
-// دالة إخفاء تقدم الرفع
-function hideUploadProgress() {
-  document.getElementById('upload-progress').style.display = 'none';
-  const createBtn = document.getElementById('create-material-btn');
-  createBtn.disabled = false;
-  createBtn.textContent = 'إضافة المادة';
 }
 
 // Utility functions
@@ -1865,6 +1889,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Make functions globally available
 window.showCoursePreview = showCoursePreview;
 window.subscribeToCourse = subscribeToCourse;
+window.enrollInFreeCourse = enrollInFreeCourse;
 window.showCourseContent = showCourseContent;
 window.selectLecture = selectLecture;
 window.selectMaterial = selectMaterial;
