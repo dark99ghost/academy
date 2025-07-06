@@ -32,7 +32,10 @@ import {
   uploadAvatar,
   checkUserCourseAccess,
   getYouTubeEmbedUrl,
-  getRoleDisplayName
+  getRoleDisplayName,
+  uploadFile,
+  getFileType,
+  validateFileType
 } from './supabase.js';
 
 // Global variables
@@ -44,6 +47,10 @@ let currentCourseId = null;
 let currentLectureId = null;
 let currentMaterial = null;
 let modalEventListenersAdded = false; // منع تكرار إضافة event listeners
+
+// متغيرات جديدة لرفع الملفات
+let selectedFile = null;
+let isFileUploaded = false;
 
 // DOM Elements
 const loadingContainer = document.getElementById('loading');
@@ -318,6 +325,25 @@ function setupEventListeners() {
       handleUserSearch();
     }
   });
+
+  // File upload listeners
+  document.getElementById('file-upload-area').addEventListener('click', () => {
+    document.getElementById('material-file').click();
+  });
+  
+  document.getElementById('material-file').addEventListener('change', handleFileSelect);
+  document.getElementById('remove-file-btn').addEventListener('click', removeSelectedFile);
+  
+  // Material source radio buttons
+  document.querySelectorAll('input[name="material-source"]').forEach(radio => {
+    radio.addEventListener('change', toggleMaterialSource);
+  });
+  
+  // Drag and drop للملفات
+  const uploadArea = document.getElementById('file-upload-area');
+  uploadArea.addEventListener('dragover', handleDragOver);
+  uploadArea.addEventListener('dragleave', handleDragLeave);
+  uploadArea.addEventListener('drop', handleFileDrop);
 }
 
 // Authentication handlers
@@ -1332,16 +1358,45 @@ async function handleCreateMaterial(e) {
   
   const title = document.getElementById('material-title').value;
   const type = document.getElementById('material-type').value;
-  const url = document.getElementById('material-url').value;
   const duration = parseInt(document.getElementById('material-duration').value) || 0;
   const orderIndex = parseInt(document.getElementById('material-order').value) || 0;
+  const materialSource = document.querySelector('input[name="material-source"]:checked').value;
+  
+  let materialUrl = '';
   
   try {
+    if (materialSource === 'upload') {
+      // رفع ملف
+      if (!selectedFile) {
+        alert('يرجى اختيار ملف للرفع');
+        return;
+      }
+      
+      showUploadProgress();
+      
+      const { data: uploadedUrl, error: uploadError } = await uploadFile(selectedFile, 'materials');
+      
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      materialUrl = uploadedUrl;
+      isFileUploaded = true;
+      
+    } else {
+      // استخدام رابط
+      materialUrl = document.getElementById('material-url').value;
+      if (!materialUrl) {
+        alert('يرجى إدخال رابط المادة');
+        return;
+      }
+    }
+    
     const { data, error } = await createLectureMaterial({
       lecture_id: currentLectureId,
       title,
       type,
-      url,
+      url: materialUrl,
       duration,
       order_index: orderIndex
     });
@@ -1355,6 +1410,11 @@ async function handleCreateMaterial(e) {
     
     // Reset form
     document.getElementById('createMaterialForm').reset();
+    removeSelectedFile();
+    
+    // إعادة تحديد الخيار الافتراضي
+    document.querySelector('input[name="material-source"][value="upload"]').checked = true;
+    toggleMaterialSource();
     
     // Reload materials
     await loadLectureMaterials();
@@ -1362,6 +1422,8 @@ async function handleCreateMaterial(e) {
   } catch (error) {
     console.error('Error creating material:', error);
     alert('خطأ في إضافة المادة: ' + error.message);
+  } finally {
+    hideUploadProgress();
   }
 }
 
@@ -1645,6 +1707,106 @@ function showCreateLectureModal() {
 
 function showCreateMaterialModal() {
   showModal('create-material-modal');
+}
+
+// File Upload Functions
+// دالة التبديل بين رفع ملف أو إدخال رابط
+function toggleMaterialSource() {
+  const selectedSource = document.querySelector('input[name="material-source"]:checked').value;
+  const fileSection = document.getElementById('file-upload-section');
+  const linkSection = document.getElementById('link-input-section');
+  
+  if (selectedSource === 'upload') {
+    fileSection.style.display = 'block';
+    linkSection.style.display = 'none';
+    document.getElementById('material-url').removeAttribute('required');
+  } else {
+    fileSection.style.display = 'none';
+    linkSection.style.display = 'block';
+    document.getElementById('material-url').setAttribute('required', 'required');
+    // إزالة الملف المختار إذا كان موجود
+    removeSelectedFile();
+  }
+}
+
+// دالة اختيار الملف
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) {
+    processSelectedFile(file);
+  }
+}
+
+// دالة معالجة الملف المختار
+function processSelectedFile(file) {
+  // التحقق من نوع الملف
+  const validation = validateFileType(file);
+  if (!validation.isValid) {
+    alert(validation.error);
+    return;
+  }
+  
+  selectedFile = file;
+  
+  // إخفاء منطقة الرفع وإظهار معلومات الملف
+  document.querySelector('.upload-placeholder').style.display = 'none';
+  document.getElementById('uploaded-file-info').style.display = 'flex';
+  document.getElementById('uploaded-file-name').textContent = file.name;
+  
+  // تحديد نوع المادة تلقائياً
+  const detectedType = getFileType(file.name);
+  const typeSelect = document.getElementById('material-type');
+  if (detectedType && typeSelect.querySelector(`option[value="${detectedType}"]`)) {
+    typeSelect.value = detectedType;
+  }
+}
+
+// دالة إزالة الملف المختار
+function removeSelectedFile() {
+  selectedFile = null;
+  isFileUploaded = false;
+  
+  document.getElementById('material-file').value = '';
+  document.querySelector('.upload-placeholder').style.display = 'block';
+  document.getElementById('uploaded-file-info').style.display = 'none';
+  document.getElementById('upload-progress').style.display = 'none';
+}
+
+// دوال Drag and Drop
+function handleDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function handleFileDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    processSelectedFile(files[0]);
+  }
+}
+
+// دالة إظهار تقدم الرفع
+function showUploadProgress() {
+  document.getElementById('upload-progress').style.display = 'block';
+  const createBtn = document.getElementById('create-material-btn');
+  createBtn.disabled = true;
+  createBtn.textContent = 'جاري الرفع...';
+}
+
+// دالة إخفاء تقدم الرفع
+function hideUploadProgress() {
+  document.getElementById('upload-progress').style.display = 'none';
+  const createBtn = document.getElementById('create-material-btn');
+  createBtn.disabled = false;
+  createBtn.textContent = 'إضافة المادة';
 }
 
 // Utility functions
