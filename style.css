@@ -157,42 +157,52 @@ body {
   font-size: 12px;
 }
 
-/* Upload Method Selector */
-.upload-method-selector {
+/* Radio Group Styles - تحسين محاذاة الدوائر */
+.radio-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   margin-top: 10px;
 }
 
-.radio-option {
+.radio-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 12px;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: var(--transition);
+  font-weight: normal;
 }
 
-.radio-option:hover {
+.radio-label:hover {
   border-color: var(--primary-color);
   background: var(--light-color);
 }
 
-.radio-option input[type="radio"] {
-  width: auto;
+.radio-label input[type="radio"] {
+  width: 18px;
+  height: 18px;
   margin: 0;
   padding: 0;
+  flex-shrink: 0;
+  accent-color: var(--primary-color);
 }
 
-.radio-option input[type="radio"]:checked + span {
+.radio-label span {
+  flex: 1;
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.radio-label input[type="radio"]:checked + span {
   color: var(--primary-color);
   font-weight: 600;
 }
 
-.radio-option:has(input[type="radio"]:checked) {
+.radio-label:has(input[type="radio"]:checked) {
   border-color: var(--primary-color);
   background: var(--light-color);
 }
@@ -210,6 +220,12 @@ body {
 .file-upload-area:hover {
   border-color: var(--primary-color);
   background: var(--light-color);
+}
+
+.file-upload-area.drag-over {
+  border-color: var(--primary-color);
+  background: var(--light-color);
+  transform: scale(1.02);
 }
 
 .file-upload-placeholder i {
@@ -232,6 +248,9 @@ body {
 /* Upload Progress */
 .upload-progress {
   margin-top: 20px;
+  padding: 15px;
+  background: var(--light-color);
+  border-radius: var(--border-radius);
 }
 
 .progress-bar {
@@ -256,20 +275,31 @@ body {
 }
 
 /* Upload Success */
-.upload-success {
+.uploaded-file-info {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
   padding: 15px;
   background: var(--success-color);
   color: white;
   border-radius: var(--border-radius);
+  margin-top: 15px;
+  gap: 10px;
 }
 
-.upload-success i {
-  font-size: 20px;
+.uploaded-file-info i {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.uploaded-file-info span {
+  flex: 1;
+  font-weight: 500;
+}
+
+.btn-small {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 4px;
 }
 
 /* Buttons */
@@ -557,7 +587,8 @@ body {
 }
 
 .course-actions .btn-primary,
-.course-actions .btn-secondary {
+.course-actions .btn-secondary,
+.course-actions .btn-success {
   flex: 1;
   width: auto;
   padding: 10px 16px;
@@ -1593,11 +1624,11 @@ body {
   }
 
   /* تحسينات للنماذج على الموبايل */
-  .upload-method-selector {
+  .radio-group {
     gap: 8px;
   }
 
-  .radio-option {
+  .radio-label {
     padding: 10px;
     font-size: 14px;
   }
