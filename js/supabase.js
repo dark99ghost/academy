@@ -1,3 +1,422 @@
+import { createClient } from '@supabase/supabase-js';
+
+// Use environment variables with fallback to hardcoded values
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://kzbclgbwwkykjtdqtnlg.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6YmNsZ2J3d2t5a2p0ZHF0bmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2ODk0NTIsImV4cCI6MjA2NjI2NTQ1Mn0.uI5UlqHSi_KtVJAPllSNnpZ-jxslsiI9VYkp9GiafOE';
+
+console.log('Supabase URL:', supabaseUrl);
+console.log('Supabase Key exists:', !!supabaseKey);
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false
+  }
+});
+
+// Test connection
+supabase.from('courses').select('count', { count: 'exact', head: true })
+  .then(({ error }) => {
+    if (error) {
+      console.error('Supabase connection test failed:', error);
+    } else {
+      console.log('Supabase connection successful');
+    }
+  });
+
+// User Management Functions
+export async function signUp(email, password, userData) {
+  try {
+    console.log('Starting signup process for:', email);
+    
+    // Sign up the user with metadata
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: userData.full_name,
+          education_level: userData.education_level
+        }
+      }
+    });
+    
+    if (authError) {
+      console.error('Auth signup error:', authError);
+      throw authError;
+    }
+    
+    console.log('Auth signup successful:', authData);
+    
+    return { data: authData, error: null };
+  } catch (error) {
+    console.error('SignUp error:', error);
+    return { data: null, error };
+  }
+}
+
+export async function signIn(email, password) {
+  try {
+    console.log('Starting signin process for:', email);
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) {
+      console.error('SignIn error:', error);
+      throw error;
+    }
+    
+    console.log('SignIn successful:', data);
+    
+    return { data, error: null };
+  } catch (error) {
+    console.error('SignIn error:', error);
+    return { data: null, error };
+  }
+}
+
+export async function signOut() {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('SignOut error:', error);
+    return { error };
+  }
+}
+
+export async function getCurrentUser() {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+      if (error.message === 'Auth session missing!') {
+        return null;
+      }
+      throw error;
+    }
+    return user;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+}
+
+export async function getUserProfile(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return { data: null, error };
+  }
+}
+
+export async function updateUserProfile(userId, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update(updates)
+      .eq('user_id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    return { data: null, error };
+  }
+}
+
+export async function updatePassword(newPassword) {
+  try {
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating password:', error);
+    return { data: null, error };
+  }
+}
+
+// Course Management Functions
+export async function getCourses() {
+  try {
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Error getting courses:', error);
+    return { data: [], error };
+  }
+}
+
+export async function getCourse(courseId) {
+  try {
+    const { data, error } = await supabase
+      .from('courses')
+      .select(`
+        *,
+        lectures (
+          id,
+          title,
+          description,
+          duration,
+          order_index,
+          is_active,
+          lecture_materials (
+            id,
+            title,
+            type,
+            url,
+            duration,
+            order_index,
+            is_active
+          )
+        )
+      `)
+      .eq('id', courseId)
+      .eq('is_active', true)
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error getting course:', error);
+    return { data: null, error };
+  }
+}
+
+export async function createCourse(courseData) {
+  try {
+    console.log('Creating course with data:', courseData);
+    
+    // التأكد من وجود جميع الحقول المطلوبة
+    const courseToCreate = {
+      title: courseData.title,
+      description: courseData.description,
+      price: courseData.price,
+      image_url: courseData.image_url || null,
+      target_level: courseData.target_level || 'الكل',
+      is_active: true
+    };
+    
+    console.log('Final course data:', courseToCreate);
+    
+    const { data, error } = await supabase
+      .from('courses')
+      .insert([courseToCreate])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Course creation error:', error);
+      throw error;
+    }
+    
+    console.log('Course created successfully:', data);
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error creating course:', error);
+    return { data: null, error };
+  }
+}
+
+export async function deleteCourse(courseId) {
+  try {
+    const { error } = await supabase
+      .from('courses')
+      .update({ is_active: false })
+      .eq('id', courseId);
+    
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('Error deleting course:', error);
+    return { error };
+  }
+}
+
+// Lecture Management Functions
+export async function getCourseLectures(courseId) {
+  try {
+    const { data, error } = await supabase
+      .from('lectures')
+      .select(`
+        *,
+        lecture_materials (
+          id,
+          title,
+          type,
+          url,
+          duration,
+          file_size,
+          order_index,
+          is_active
+        )
+      `)
+      .eq('course_id', courseId)
+      .eq('is_active', true)
+      .order('order_index', { ascending: true });
+    
+    if (error) throw error;
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Error getting course lectures:', error);
+    return { data: [], error };
+  }
+}
+
+export async function createLecture(lectureData) {
+  try {
+    const { data, error } = await supabase
+      .from('lectures')
+      .insert([lectureData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error creating lecture:', error);
+    return { data: null, error };
+  }
+}
+
+export async function updateLecture(lectureId, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('lectures')
+      .update(updates)
+      .eq('id', lectureId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating lecture:', error);
+    return { data: null, error };
+  }
+}
+
+export async function deleteLecture(lectureId) {
+  try {
+    const { error } = await supabase
+      .from('lectures')
+      .update({ is_active: false })
+      .eq('id', lectureId);
+    
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('Error deleting lecture:', error);
+    return { error };
+  }
+}
+
+// Lecture Materials Functions
+export async function createLectureMaterial(materialData) {
+  try {
+    const { data, error } = await supabase
+      .from('lecture_materials')
+      .insert([materialData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error creating lecture material:', error);
+    return { data: null, error };
+  }
+}
+
+export async function updateLectureMaterial(materialId, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('lecture_materials')
+      .update(updates)
+      .eq('id', materialId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating lecture material:', error);
+    return { data: null, error };
+  }
+}
+
+export async function deleteLectureMaterial(materialId) {
+  try {
+    const { error } = await supabase
+      .from('lecture_materials')
+      .update({ is_active: false })
+      .eq('id', materialId);
+    
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('Error deleting lecture material:', error);
+    return { error };
+  }
+}
+
+// Subscription Code Functions
+export async function createSubscriptionCode(codeData) {
+  try {
+    const { data, error } = await supabase
+      .from('subscription_codes')
+      .insert([codeData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error creating subscription code:', error);
+    return { data: null, error };
+  }
+}
+
+export async function updateSubscriptionCode(codeId, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('subscription_codes')
+      .update(updates)
+      .eq('id', codeId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating subscription code:', error);
+    return { data: null, error };
+  }
+}
+
 export async function deleteSubscriptionCode(codeId) {
   try {
     const { data, error } = await supabase.rpc('delete_subscription_code', {
@@ -135,23 +554,6 @@ export async function useSubscriptionCode(codeId, userId, courseId) {
     return { data: access, error: null };
   } catch (error) {
     console.error('Error using subscription code:', error);
-    return { data: null, error };
-  }
-}
-
-// Create course function
-export async function createCourse(courseData) {
-  try {
-    const { data, error } = await supabase
-      .from('courses')
-      .insert([courseData])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('Error creating course:', error);
     return { data: null, error };
   }
 }
@@ -320,73 +722,6 @@ export async function uploadAvatar(userId, file) {
   }
 }
 
-// دالة رفع الفيديو محسنة
-export async function uploadVideo(userId, file, onProgress) {
-  try {
-    console.log('Starting video upload for user:', userId);
-    console.log('File details:', { name: file.name, size: file.size, type: file.type });
-    
-    // التحقق من نوع الملف
-    if (!file.type.startsWith('video/')) {
-      throw new Error('يجب أن يكون الملف فيديو');
-    }
-    
-    // التحقق من حجم الملف (أقل من 500MB)
-    if (file.size > 500 * 1024 * 1024) {
-      throw new Error('حجم الفيديو يجب أن يكون أقل من 500 ميجابايت');
-    }
-    
-    const fileExt = file.name.split('.').pop().toLowerCase();
-    const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `videos/${fileName}`;
-
-    console.log('Uploading video to path:', filePath);
-
-    // محاكاة تقدم الرفع
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-      progress += Math.random() * 15;
-      if (progress > 90) progress = 90;
-      if (onProgress) onProgress(Math.round(progress));
-    }, 500);
-
-    try {
-      // رفع الملف إلى التخزين
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('videos')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      clearInterval(progressInterval);
-      if (onProgress) onProgress(100);
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw new Error(`خطأ في رفع الفيديو: ${uploadError.message}`);
-      }
-
-      console.log('Upload successful:', uploadData);
-
-      // الحصول على الرابط العام للفيديو
-      const { data: urlData } = supabase.storage
-        .from('videos')
-        .getPublicUrl(filePath);
-
-      console.log('Public URL:', urlData.publicUrl);
-
-      return { data: urlData.publicUrl, error: null };
-    } catch (error) {
-      clearInterval(progressInterval);
-      throw error;
-    }
-  } catch (error) {
-    console.error('Error uploading video:', error);
-    return { data: null, error };
-  }
-}
-
 // دالة للتحقق من وصول المستخدم للكورس
 export async function checkUserCourseAccess(userId, courseId) {
   try {
@@ -431,205 +766,4 @@ export function getRoleDisplayName(role) {
     admin: 'أدمن'
   };
   return roles[role] || 'طالب';
-}
-
-// Initialize Supabase
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Auth functions
-export async function signUp(email, password, metadata = {}) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: metadata
-    }
-  });
-  return { data, error };
-}
-
-export async function signIn(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-  return { data, error };
-}
-
-export async function signOut() {
-  const { error } = await supabase.auth.signOut();
-  return { error };
-}
-
-export async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
-
-// Profile functions
-export async function getUserProfile(userId) {
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-  
-  return { data, error };
-}
-
-export async function updateUserProfile(userId, updates) {
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .update(updates)
-    .eq('user_id', userId)
-    .select()
-    .single();
-  
-  return { data, error };
-}
-
-export async function updatePassword(newPassword) {
-  const { data, error } = await supabase.auth.updateUser({
-    password: newPassword
-  });
-  return { data, error };
-}
-
-// Course functions
-export async function getCourses() {
-  const { data, error } = await supabase
-    .from('courses')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
-  
-  return { data, error };
-}
-
-export async function getCourse(courseId) {
-  const { data, error } = await supabase
-    .from('courses')
-    .select(`
-      *,
-      lectures (
-        *,
-        lecture_materials (*)
-      )
-    `)
-    .eq('id', courseId)
-    .single();
-  
-  return { data, error };
-}
-
-export async function deleteCourse(courseId) {
-  const { data, error } = await supabase
-    .from('courses')
-    .delete()
-    .eq('id', courseId);
-  
-  return { data, error };
-}
-
-// Lecture functions
-export async function getCourseLectures(courseId) {
-  const { data, error } = await supabase
-    .from('lectures')
-    .select(`
-      *,
-      lecture_materials (*)
-    `)
-    .eq('course_id', courseId)
-    .eq('is_active', true)
-    .order('order_index', { ascending: true });
-  
-  return { data, error };
-}
-
-export async function createLecture(lectureData) {
-  const { data, error } = await supabase
-    .from('lectures')
-    .insert([lectureData])
-    .select()
-    .single();
-  
-  return { data, error };
-}
-
-export async function updateLecture(lectureId, updates) {
-  const { data, error } = await supabase
-    .from('lectures')
-    .update(updates)
-    .eq('id', lectureId)
-    .select()
-    .single();
-  
-  return { data, error };
-}
-
-export async function deleteLecture(lectureId) {
-  const { data, error } = await supabase
-    .from('lectures')
-    .delete()
-    .eq('id', lectureId);
-  
-  return { data, error };
-}
-
-// Lecture material functions
-export async function createLectureMaterial(materialData) {
-  const { data, error } = await supabase
-    .from('lecture_materials')
-    .insert([materialData])
-    .select()
-    .single();
-  
-  return { data, error };
-}
-
-export async function updateLectureMaterial(materialId, updates) {
-  const { data, error } = await supabase
-    .from('lecture_materials')
-    .update(updates)
-    .eq('id', materialId)
-    .select()
-    .single();
-  
-  return { data, error };
-}
-
-export async function deleteLectureMaterial(materialId) {
-  const { data, error } = await supabase
-    .from('lecture_materials')
-    .delete()
-    .eq('id', materialId);
-  
-  return { data, error };
-}
-
-// Subscription code functions
-export async function createSubscriptionCode(codeData) {
-  const { data, error } = await supabase
-    .from('subscription_codes')
-    .insert([codeData])
-    .select()
-    .single();
-  
-  return { data, error };
-}
-
-export async function updateSubscriptionCode(codeId, updates) {
-  const { data, error } = await supabase
-    .from('subscription_codes')
-    .update(updates)
-    .eq('id', codeId)
-    .select()
-    .single();
-  
-  return { data, error };
 }
