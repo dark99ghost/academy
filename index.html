@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="src/upload-styles.css">
   </head>
   <body>
     <div id="app">
@@ -323,8 +322,8 @@
                 <textarea id="course-description" rows="3" required></textarea>
               </div>
               <div class="form-group">
-                <label>سعر الكورس</label>
-                <input type="number" id="course-price" min="0" required>
+                <label>سعر الكورس (اتركه صفر للكورسات المجانية)</label>
+                <input type="number" id="course-price" min="0" value="0" required>
               </div>
               <div class="form-group">
                 <label>الفئة المستهدفة</label>
