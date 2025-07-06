@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="src/upload-styles.css">
   </head>
   <body>
     <div id="app">
@@ -500,93 +501,93 @@
       </div>
 
       <!-- Create Material Modal -->
-<div id="create-material-modal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>إضافة مادة جديدة</h3>
-      <button class="modal-close">&times;</button>
+      <div id="create-material-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>إضافة مادة جديدة</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="createMaterialForm">
+              <div class="form-group">
+                <label>عنوان المادة</label>
+                <input type="text" id="material-title" required>
+              </div>
+              
+              <div class="form-group">
+                <label>نوع المادة</label>
+                <select id="material-type" required>
+                  <option value="">اختر نوع المادة</option>
+                  <option value="video">فيديو</option>
+                  <option value="pdf">ملف PDF</option>
+                  <option value="document">مستند</option>
+                  <option value="image">صورة</option>
+                  <option value="audio">ملف صوتي</option>
+                </select>
+              </div>
+              
+              <!-- خيار اختيار طريقة إضافة المادة -->
+              <div class="form-group">
+                <label>طريقة إضافة المادة</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="material-source" value="upload" checked>
+                    <span>رفع ملف من الجهاز</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="material-source" value="link">
+                    <span>إدخال رابط</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- منطقة رفع الملفات -->
+              <div id="file-upload-section" class="form-group">
+                <label>اختر الملف</label>
+                <div class="file-upload-area" id="file-upload-area">
+                  <div class="upload-placeholder">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>اسحب الملف هنا أو اضغط للاختيار</p>
+                    <small>أحجام مدعومة: حتى 100 ميجابايت</small>
+                  </div>
+                  <input type="file" id="material-file" accept=".mp4,.avi,.mov,.pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav" style="display: none;">
+                </div>
+                <div id="upload-progress" class="upload-progress" style="display: none;">
+                  <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                  </div>
+                  <span class="progress-text">0%</span>
+                </div>
+                <div id="uploaded-file-info" class="uploaded-file-info" style="display: none;">
+                  <i class="fas fa-check-circle"></i>
+                  <span id="uploaded-file-name"></span>
+                  <button type="button" id="remove-file-btn" class="btn-danger btn-small">إزالة</button>
+                </div>
+              </div>
+              
+              <!-- منطقة إدخال الرابط -->
+              <div id="link-input-section" class="form-group" style="display: none;">
+                <label>رابط المادة</label>
+                <input type="url" id="material-url" placeholder="https://example.com/file.pdf">
+                <small>يمكنك إضافة رابط يوتيوب، رابط ملف PDF، أو أي رابط آخر</small>
+              </div>
+              
+              <div class="form-group">
+                <label>مدة المادة (بالدقائق) - للفيديوهات والصوتيات فقط</label>
+                <input type="number" id="material-duration" min="0" value="0">
+              </div>
+              
+              <div class="form-group">
+                <label>ترتيب المادة</label>
+                <input type="number" id="material-order" min="0" value="0">
+              </div>
+              
+              <button type="submit" class="btn-primary" id="create-material-btn">إضافة المادة</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="modal-body">
-      <form id="createMaterialForm">
-        <div class="form-group">
-          <label>عنوان المادة</label>
-          <input type="text" id="material-title" required>
-        </div>
-        
-        <div class="form-group">
-          <label>نوع المادة</label>
-          <select id="material-type" required>
-            <option value="">اختر نوع المادة</option>
-            <option value="video">فيديو</option>
-            <option value="pdf">ملف PDF</option>
-            <option value="document">مستند</option>
-            <option value="image">صورة</option>
-            <option value="audio">ملف صوتي</option>
-          </select>
-        </div>
-        
-        <!-- خيار اختيار طريقة إضافة المادة -->
-        <div class="form-group">
-          <label>طريقة إضافة المادة</label>
-          <div class="radio-group">
-            <label class="radio-label">
-              <input type="radio" name="material-source" value="upload" checked>
-              <span>رفع ملف من الجهاز</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="material-source" value="link">
-              <span>إدخال رابط</span>
-            </label>
-          </div>
-        </div>
-        
-        <!-- منطقة رفع الملفات -->
-        <div id="file-upload-section" class="form-group">
-          <label>اختر الملف</label>
-          <div class="file-upload-area" id="file-upload-area">
-            <div class="upload-placeholder">
-              <i class="fas fa-cloud-upload-alt"></i>
-              <p>اسحب الملف هنا أو اضغط للاختيار</p>
-              <small>أحجام مدعومة: حتى 100 ميجابايت</small>
-            </div>
-            <input type="file" id="material-file" accept=".mp4,.avi,.mov,.pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav" style="display: none;">
-          </div>
-          <div id="upload-progress" class="upload-progress" style="display: none;">
-            <div class="progress-bar">
-              <div class="progress-fill"></div>
-            </div>
-            <span class="progress-text">0%</span>
-          </div>
-          <div id="uploaded-file-info" class="uploaded-file-info" style="display: none;">
-            <i class="fas fa-check-circle"></i>
-            <span id="uploaded-file-name"></span>
-            <button type="button" id="remove-file-btn" class="btn-danger btn-small">إزالة</button>
-          </div>
-        </div>
-        
-        <!-- منطقة إدخال الرابط -->
-        <div id="link-input-section" class="form-group" style="display: none;">
-          <label>رابط المادة</label>
-          <input type="url" id="material-url" placeholder="https://example.com/file.pdf">
-          <small>يمكنك إضافة رابط يوتيوب، رابط ملف PDF، أو أي رابط آخر</small>
-        </div>
-        
-        <div class="form-group">
-          <label>مدة المادة (بالدقائق) - للفيديوهات والصوتيات فقط</label>
-          <input type="number" id="material-duration" min="0" value="0">
-        </div>
-        
-        <div class="form-group">
-          <label>ترتيب المادة</label>
-          <input type="number" id="material-order" min="0" value="0">
-        </div>
-        
-        <button type="submit" class="btn-primary" id="create-material-btn">إضافة المادة</button>
-      </form>
-    </div>
-  </div>
-</div>
-
 
     <script type="module" src="js/supabase.js"></script>
     <script type="module" src="js/app.js"></script>
